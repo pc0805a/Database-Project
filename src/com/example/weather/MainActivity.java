@@ -1,6 +1,7 @@
 package com.example.weather;
 
-
+import java.io.IOException;
+import java.net.URLEncoder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,14 +29,27 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		getInfo();
+		
 		initViews();
 		setListeners();
 
 	}
+	
+	private void getInfo()
+	{
+		try{
+		String baseUrl = "http://query.yahooapis.com/v1/public/yql?q=";
+		String query = "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text\"nome, ak\")";
+		String fullUrlStr = baseUrl + URLEncoder.encode(query, "UTF-8") + "&format=json";
+		GetWeatherInfo info = new GetWeatherInfo();
+		}catch(IOException err)
+		{
+			Log.e(TAG, "error: " + err.toString());
+		}
+	}
 
 	private Button button_search;
-	
-
 
 	private void initViews() {
 		button_search = (Button) findViewById(R.id.button_search);
@@ -45,23 +59,22 @@ public class MainActivity extends Activity {
 	private void setListeners() {
 		button_search.setOnClickListener(search);
 	}
-	
+
 	private OnClickListener search = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-
 
 			Intent intent = new Intent();
 
 			intent.setClass(MainActivity.this, SearchActivity.class);
 			Bundle bundle = new Bundle();
 			try {
-//				bundle.putDouble("KEY_HEIGHT",
-//						Double.parseDouble(num_height.getText().toString()));
-//				bundle.putDouble("KEY_WEIGHT",
-//						Double.parseDouble(num_weight.getText().toString()));
-//				intent.putExtras(bundle);
+				// bundle.putDouble("KEY_HEIGHT",
+				// Double.parseDouble(num_height.getText().toString()));
+				// bundle.putDouble("KEY_WEIGHT",
+				// Double.parseDouble(num_weight.getText().toString()));
+				// intent.putExtras(bundle);
 
 				startActivityForResult(intent, ACTIVITY_REPORT);
 			} catch (Exception err) {
@@ -75,8 +88,6 @@ public class MainActivity extends Activity {
 		}
 
 	};
-	
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -100,6 +111,11 @@ public class MainActivity extends Activity {
 
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	public void get_current_local_info() {
+		
+
 	}
 
 	public void openOptionsDialog() {
@@ -126,6 +142,8 @@ public class MainActivity extends Activity {
 
 		dialog.show();
 	}
+	
+	
 }
 
 

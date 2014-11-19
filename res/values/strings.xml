@@ -11,4 +11,12 @@
     <string name="label_fb">FB</string>
 	<string name="fb_uri">https://www.facebook.com/profile.php?id=100002595540446</string>
 	<string name="input_error">請輸入地名</string>
+	<string name="current_location_label">當前位置</string>
+	<string name="other_location_label">其他地區</string>
+	<string name="current_weather_label">現在天氣 :</string>
+	<string name="current_temperature_label">現在溫度 :</string>
+	<string name="pop_label">降雨機率 :</string>
+	<string name="btn_reliable">Reliable</string>
+	<string name="btn_unreliable">Unreable</string>
+	<string name="btn_search">搜尋</string>
 </resources>

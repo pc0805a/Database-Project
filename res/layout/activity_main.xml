@@ -1,94 +1,114 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/temp_background"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.weather.MainActivity" >
 
-    <Button
-        android:id="@+id/button_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp"
-        android:text="搜尋" />
-
-    <EditText
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button_search"
-        android:layout_centerHorizontal="true"
-        android:ems="10" >
-
-        <requestFocus />
-    </EditText>
-
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
         android:layout_marginTop="14dp"
-        android:text="當前位置"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/location"
-        android:layout_centerHorizontal="true"
-        android:text="其他地區" />
+        android:text="@string/current_location_label"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/location"
-        android:layout_below="@+id/textView4"
+        android:layout_marginLeft="35dp"
         android:layout_marginTop="39dp"
-        android:text="當前天氣：" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/location"
-        android:layout_below="@+id/textView1"
-        android:text="當前溫度：" />
+        android:text="@string/current_weather_label"
+        android:textColor="@color/white"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/location"
-        android:layout_below="@+id/textView2"
-        android:text="降雨機率：" />
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="36dp"
+        android:text="@string/pop_label"
+        android:textColor="@color/white"
+        android:textSize="18sp" />
 
-    <Button
-        android:id="@+id/button1"
-        style="?android:attr/buttonStyleSmall"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView5"
-        android:layout_toLeftOf="@+id/button_search"
-        android:text="Reliable" />
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/current_temperature_label"
+        android:textColor="@color/white"
+        android:textSize="18sp" />
 
-    <Button
-        android:id="@+id/button2"
-        style="?android:attr/buttonStyleSmall"
+    <LinearLayout
+        android:id="@+id/buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/button1"
-        android:layout_alignBottom="@+id/button1"
-        android:layout_toRightOf="@+id/textView5"
-        android:text="Unreliable" />
+        android:paddingLeft="30dp" >
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/button1"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45dp"
+            android:text="@string/btn_reliable"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="                       "
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <Button
+            android:id="@+id/button2"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45dp"
+            android:text="@string/btn_unreliable"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"
+        android:text="@string/other_location_label"
+        android:textColor="@color/white" />
+
+    <EditText
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:ems="10" />
+
+    <Button
+        android:id="@+id/button_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="15dp"
+        android:text="@string/btn_search"
+        android:textColor="@color/white" />
+
+</LinearLayout>
