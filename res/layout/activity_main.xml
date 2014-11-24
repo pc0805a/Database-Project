@@ -21,6 +21,27 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 
+    <LinearLayout
+        android:id="@+id/geo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/lon"
+            android:layout_width="98dp"
+            android:layout_height="wrap_content"
+            android:text="lon"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/lat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lat" 
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
@@ -81,7 +102,6 @@
             android:layout_marginTop="45dp"
             android:text="@string/btn_unreliable"
             android:textColor="@color/white" />
-
     </LinearLayout>
 
     <TextView
