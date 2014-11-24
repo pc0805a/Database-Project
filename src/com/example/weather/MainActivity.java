@@ -38,19 +38,15 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements LocationListener {
 
 	protected static final int ACTIVITY_REPORT = 1000;
-	
+
 	private static final int MIN_TIME_BW_UPDATES = 1000;
 	private static final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000;
-	
-	
+
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private boolean getService = false;
 	private LocationManager locationManager;
 	private String bestProvider = LocationManager.GPS_PROVIDER;
 
-	private boolean isNetworkEnabled;
-	private boolean isGPSEnabled;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,17 +54,20 @@ public class MainActivity extends Activity implements LocationListener {
 
 		LocationManager status = (LocationManager) (this
 				.getSystemService(Context.LOCATION_SERVICE));
-		isNetworkEnabled = status
-				.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-		isGPSEnabled = status.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-		if (isGPSEnabled || isGPSEnabled) {
+		try
+		{
+		if (status.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+				) {
 			// 如果GPS或網路定位開啟，呼叫locationServiceInitial()更新位置
 			locationServiceInitial();
 		} else {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 			getService = true; // 確認開啟定位服務
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
+		}
+		}catch (Exception err)
+		{
+			Log.e(TAG, "error: " + err.toString());
 		}
 
 		initViews();
@@ -80,23 +79,20 @@ public class MainActivity extends Activity implements LocationListener {
 	private void locationServiceInitial() {
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); // 取得系統定位服務
 		Criteria criteria = new Criteria(); // 資訊提供者選取標準
-
+		
 		bestProvider = locationManager.getBestProvider(criteria, true); // 選擇精準度最高的提供者
 		Location location = locationManager.getLastKnownLocation(bestProvider);
-		
-		
 
 		getLocation(location);
 	}
 
 	private void getLocation(Location location) { // 將定位資訊顯示在畫面中
-		
-		
+
 		if (location != null) {
 			Double longitude = location.getLongitude(); // 取得經度
 			Double latitude = location.getLatitude(); // 取得緯度
-			longitude_txt.setText(String.valueOf(longitude));
-			latitude_txt.setText(String.valueOf(latitude));
+			longitude_txt.setText("經度: " + String.valueOf(longitude));
+			latitude_txt.setText("緯度: " + String.valueOf(latitude));
 		} else {
 			Toast.makeText(this, "無法定位座標", Toast.LENGTH_LONG).show();
 		}
