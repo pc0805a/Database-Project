@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
 	protected static final int ACTIVITY_REPORT = 1000;
 
 	private static final String TAG = MainActivity.class.getSimpleName();
-
+	
 	private LocationManager locationMgr;
 	private String provider;
 
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
 			whereAmI();
 		} else {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
-			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
 
 	}
@@ -126,36 +126,47 @@ public class MainActivity extends Activity {
 	}
 
 	private boolean initLocationProvider() {
+
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-		// 1.選擇最佳提供器
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_FINE);
-		criteria.setAltitudeRequired(false);
-		criteria.setBearingRequired(false);
-		criteria.setCostAllowed(true);
-		criteria.setPowerRequirement(Criteria.POWER_LOW);
+		try {
+			if (locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+					|| locationMgr
+							.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+				// 1.選擇最佳提供器
+				Criteria criteria = new Criteria();
+				criteria.setAccuracy(Criteria.ACCURACY_FINE);
+				criteria.setAltitudeRequired(false);
+				criteria.setBearingRequired(false);
+				criteria.setCostAllowed(true);
+				criteria.setPowerRequirement(Criteria.POWER_LOW);
 
-		provider = locationMgr.getBestProvider(criteria, true);
+				provider = locationMgr.getBestProvider(criteria, true);
+				// 2.選擇使用GPS提供器
+				// if (locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+				// provider = LocationManager.GPS_PROVIDER;
+				// return true;
+				// }
 
-		if (provider != null) {
-			return true;
+				// 3.選擇使用網路提供器
+				// if (locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+				// {
+				// provider = LocationManager.NETWORK_PROVIDER;
+				// return true;
+				// }
+				
+
+				Log.d(TAG, "My Provider:" + provider);
+
+				return true;
+			}
+
+		} catch (Exception err) {
+			Log.e(TAG, "error: " + err.toString());
 		}
 
-		// 2.選擇使用GPS提供器
-		// if (locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-		// provider = LocationManager.GPS_PROVIDER;
-		// return true;
-		// }
-
-		// 3.選擇使用網路提供器
-		// if (locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-		// {
-		// provider = LocationManager.NETWORK_PROVIDER;
-		// return true;
-		// }
-
 		return false;
+
 	}
 
 	private void setListeners() {
@@ -353,7 +364,8 @@ public class MainActivity extends Activity {
 			latitude_txt.setText("緯度" + lat);
 
 		} else {
-			where = "No location found.";
+			where = "無法取得地理資訊"+
+		"\n若在室內請嘗試使用網路定位";
 		}
 
 		Toast.makeText(this, where, Toast.LENGTH_LONG).show();
