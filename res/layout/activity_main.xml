@@ -84,10 +84,27 @@
         android:textColor="@color/white"
         android:textSize="18sp" />
 
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/last_update"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/last_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="TextView"
+        android:textColor="@color/white" />
+
     <LinearLayout
         android:id="@+id/buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:paddingLeft="30dp" >
 
         <Button
@@ -95,7 +112,6 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="45dp"
             android:text="@string/btn_reliable"
             android:textColor="@color/white" />
 
@@ -103,6 +119,7 @@
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:text="                       "
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -111,9 +128,10 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="45dp"
+            android:layout_gravity="center_vertical"
             android:text="@string/btn_unreliable"
             android:textColor="@color/white" />
+
     </LinearLayout>
 
     <TextView

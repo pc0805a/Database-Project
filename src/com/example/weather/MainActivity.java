@@ -43,9 +43,11 @@ public class MainActivity extends Activity {
 	protected static final int ACTIVITY_REPORT = 1000;
 
 	private static final String TAG = MainActivity.class.getSimpleName();
-	
+
 	private LocationManager locationMgr;
 	private String provider;
+	private double lng;
+	private double lat;
 
 	@Override
 	protected void onStart() {
@@ -56,7 +58,16 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
-
+      
+		String query = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
+				+ lng + "," + lat + "\" and gflags=\"R\" )";
+		
+//		solve unit problem
+//		https://query.yahooapis.com/v1/public/yql?q=select * from xml where url='http://weather.yahooapis.com/forecastrss?w=2502265&u=c'&format=json
+//		https://query.yahooapis.com/v1/public/yql?q=select * from xml where url='http://weather.yahooapis.com/forecastrss?w=2502265&u=cat=json
+		
+		getInfo(query);
+		
 	}
 
 	@Override
@@ -74,55 +85,63 @@ public class MainActivity extends Activity {
 
 	}
 
-	// private void getInfo(String query) {
-	// String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
-	// String totalUrl = baseUrl + query;
-	// try {
-	// getJson(URLEncoder.encode(totalUrl, "UTF8"));
-	// } catch (UnsupportedEncodingException err) {
-	// // TODO Auto-generated catch block
-	// Log.e(TAG, "error: " + err.toString());
-	// }
-	// }
-	//
-	// public String getJson(String url) {
-	// String result = "";
-	// HttpClient httpclient = new DefaultHttpClient();
-	// HttpPost httppost = new HttpPost(url);
-	// HttpResponse response;
-	// try {
-	// response = httpclient.execute(httppost);
-	// HttpEntity entity = response.getEntity();
-	// InputStream is = entity.getContent();
-	// BufferedReader reader = new BufferedReader(new InputStreamReader(
-	// is, "utf8"), 9999999);
-	// StringBuilder sb = new StringBuilder();
-	// String line = null;
-	//
-	// while ((line = reader.readLine()) != null) {
-	// sb.append(line + "\n");
-	// }
-	// is.close();
-	// result = sb.toString();
-	// } catch (ClientProtocolException err) {
-	// Log.e(TAG, "error: " + err.toString());
-	// } catch (IOException err) {
-	// Log.e(TAG, "error: " + err.toString());
-	// }
-	//
-	// return result;
-	// }
-	//
+	// select * from weather.forecast where woeid in (select woeid from
+	// geo.placefinder where text="121.541584,25.0536704" and gflags="R" )
+	private void getInfo(String query) {
+		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
+		String totalUrl = baseUrl + query;
+		
+		Log.v(TAG, "Total URL:" + totalUrl);
+		
+		
+		Toast.makeText(this, totalUrl, Toast.LENGTH_LONG).show();
+		
+//		try {
+//			getJson(URLEncoder.encode(totalUrl, "UTF8"));
+//		} catch (UnsupportedEncodingException err) {
+//
+//			Log.e(TAG, "error: " + err.toString());
+//		}
+	}
+
+//	public String getJson(String url) {
+//		String result = "";
+//		HttpClient httpclient = new DefaultHttpClient();
+//		HttpPost httppost = new HttpPost(url);
+//		HttpResponse response;
+//		try {
+//			response = httpclient.execute(httppost);
+//			HttpEntity entity = response.getEntity();
+//			InputStream is = entity.getContent();
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(
+//					is, "utf8"), 9999999);
+//			StringBuilder sb = new StringBuilder();
+//			String line = null;
+//
+//			while ((line = reader.readLine()) != null) {
+//				sb.append(line + "\n");
+//			}
+//			is.close();
+//			result = sb.toString();
+//		} catch (ClientProtocolException err) {
+//			Log.e(TAG, "error: " + err.toString());
+//		} catch (IOException err) {
+//			Log.e(TAG, "error: " + err.toString());
+//		}
+//
+//		return result;
+//	}
+
 	private Button button_search;
 	private TextView longitude_txt;
 	private TextView latitude_txt;
-	private double lng;
-	private double lat;
+	private TextView lastUpdate_txt;
 
 	private void initViews() {
 		button_search = (Button) findViewById(R.id.button_search);
 		longitude_txt = (TextView) findViewById(R.id.lng);
 		latitude_txt = (TextView) findViewById(R.id.lat);
+		lastUpdate_txt = (TextView) findViewById(R.id.last_update);
 	}
 
 	private boolean initLocationProvider() {
@@ -133,7 +152,7 @@ public class MainActivity extends Activity {
 			if (locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 					|| locationMgr
 							.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				// 1.選擇最佳提供器
+				// 選擇最佳提供器
 				Criteria criteria = new Criteria();
 				criteria.setAccuracy(Criteria.ACCURACY_FINE);
 				criteria.setAltitudeRequired(false);
@@ -142,19 +161,6 @@ public class MainActivity extends Activity {
 				criteria.setPowerRequirement(Criteria.POWER_LOW);
 
 				provider = locationMgr.getBestProvider(criteria, true);
-				// 2.選擇使用GPS提供器
-				// if (locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				// provider = LocationManager.GPS_PROVIDER;
-				// return true;
-				// }
-
-				// 3.選擇使用網路提供器
-				// if (locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-				// {
-				// provider = LocationManager.NETWORK_PROVIDER;
-				// return true;
-				// }
-				
 
 				Log.d(TAG, "My Provider:" + provider);
 
@@ -360,12 +366,14 @@ public class MainActivity extends Activity {
 					+ timeString + "\nProvider: " + provider;
 
 			// "我"
-			longitude_txt.setText("經度" + lng);
-			latitude_txt.setText("緯度" + lat);
+			longitude_txt.setText("經度: " + lng);
+			latitude_txt.setText("緯度: " + lat);
+			lastUpdate_txt.setText(timeString);
+			
+			
 
 		} else {
-			where = "無法取得地理資訊"+
-		"\n若在室內請嘗試使用網路定位";
+			where = "無法取得地理資訊" + "\n若在室內請嘗試使用網路定位";
 		}
 
 		Toast.makeText(this, where, Toast.LENGTH_LONG).show();
