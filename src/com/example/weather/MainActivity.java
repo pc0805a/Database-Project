@@ -1,19 +1,21 @@
 package com.example.weather;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -48,6 +50,8 @@ public class MainActivity extends Activity {
 	private String provider;
 	private double lng;
 	private double lat;
+	
+	String result;
 
 	@Override
 	protected void onStart() {
@@ -62,11 +66,16 @@ public class MainActivity extends Activity {
 		String query = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
 				+ lng + "," + lat + "\" and gflags=\"R\" )";
 		
-//		solve unit problem
-//		https://query.yahooapis.com/v1/public/yql?q=select * from xml where url='http://weather.yahooapis.com/forecastrss?w=2502265&u=c'&format=json
-//		https://query.yahooapis.com/v1/public/yql?q=select * from xml where url='http://weather.yahooapis.com/forecastrss?w=2502265&u=cat=json
 		
-		getInfo(query);
+		getJson(query);
+		
+		try {
+			JSONObject jObject = new JSONObject(result);
+
+		} catch (JSONException err) {
+			// TODO Auto-generated catch block
+			Log.v(TAG, err.toString());
+		}
 		
 	}
 
@@ -85,52 +94,56 @@ public class MainActivity extends Activity {
 
 	}
 
-	// select * from weather.forecast where woeid in (select woeid from
-	// geo.placefinder where text="121.541584,25.0536704" and gflags="R" )
-	private void getInfo(String query) {
+	private void getJson(String query) {
 		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
-		String totalUrl = baseUrl + query;
+			
+		try {
+			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8") + "&format=json";
+			
+			Log.v(TAG, "Total URL:" + totalUrl);
+			
+			
+			DefaultHttpClient   httpclient = new DefaultHttpClient(new BasicHttpParams());
+			HttpPost httppost = new HttpPost(totalUrl);
+			
+			Log.v(TAG, "URI:" + httppost.getURI());
+			
+			
+			httppost.setHeader("Content-type", "application/json");
+
+			InputStream inputStream = null;
+			
+			try {
+			    HttpResponse response = httpclient.execute(httppost);           
+			    HttpEntity entity = response.getEntity();
+
+			    inputStream = entity.getContent();
+			    // json is UTF-8 by default
+			    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+			    StringBuilder sb = new StringBuilder();
+
+			    String line = null;
+			    while ((line = reader.readLine()) != null)
+			    {
+			        sb.append(line + "\n");
+			    }
+			    result = sb.toString();
+			} catch (Exception err) { 
+				Log.v(TAG, err.toString());
+			}
+			finally {
+			    try{if(inputStream != null)inputStream.close();}catch(Exception squish){}
+			}
+			
+		} catch (UnsupportedEncodingException err) {
+			// TODO Auto-generated catch block
+			Log.v(TAG, err.toString());
+		}
+
 		
-		Log.v(TAG, "Total URL:" + totalUrl);
-		
-		
-		Toast.makeText(this, totalUrl, Toast.LENGTH_LONG).show();
-		
-//		try {
-//			getJson(URLEncoder.encode(totalUrl, "UTF8"));
-//		} catch (UnsupportedEncodingException err) {
-//
-//			Log.e(TAG, "error: " + err.toString());
-//		}
 	}
 
-//	public String getJson(String url) {
-//		String result = "";
-//		HttpClient httpclient = new DefaultHttpClient();
-//		HttpPost httppost = new HttpPost(url);
-//		HttpResponse response;
-//		try {
-//			response = httpclient.execute(httppost);
-//			HttpEntity entity = response.getEntity();
-//			InputStream is = entity.getContent();
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(
-//					is, "utf8"), 9999999);
-//			StringBuilder sb = new StringBuilder();
-//			String line = null;
-//
-//			while ((line = reader.readLine()) != null) {
-//				sb.append(line + "\n");
-//			}
-//			is.close();
-//			result = sb.toString();
-//		} catch (ClientProtocolException err) {
-//			Log.e(TAG, "error: " + err.toString());
-//		} catch (IOException err) {
-//			Log.e(TAG, "error: " + err.toString());
-//		}
-//
-//		return result;
-//	}
+
 
 	private Button button_search;
 	private TextView longitude_txt;
