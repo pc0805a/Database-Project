@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -52,6 +53,7 @@ public class MainActivity extends Activity {
 	private double lat;
 	
 	String result;
+	String query;
 
 	@Override
 	protected void onStart() {
@@ -63,19 +65,28 @@ public class MainActivity extends Activity {
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
       
-		String query = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
+		query = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
 				+ lng + "," + lat + "\" and gflags=\"R\" )";
 		
 		
-		getJson(query);
-		
 		try {
-			JSONObject jObject = new JSONObject(result);
-
-		} catch (JSONException err) {
+			result = new GetWeatherInfo(query).execute().get();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			Log.v(TAG, err.toString());
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		
+//		try {
+//			JSONObject jObject = new JSONObject(result);
+//
+//		} catch (JSONException err) {
+//			// TODO Auto-generated catch block
+//			Log.v(TAG, err.toString());
+//		}
 		
 	}
 
@@ -94,54 +105,7 @@ public class MainActivity extends Activity {
 
 	}
 
-	private void getJson(String query) {
-		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
-			
-		try {
-			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8") + "&format=json";
-			
-			Log.v(TAG, "Total URL:" + totalUrl);
-			
-			
-			DefaultHttpClient   httpclient = new DefaultHttpClient(new BasicHttpParams());
-			HttpPost httppost = new HttpPost(totalUrl);
-			
-			Log.v(TAG, "URI:" + httppost.getURI());
-			
-			
-			httppost.setHeader("Content-type", "application/json");
-
-			InputStream inputStream = null;
-			
-			try {
-			    HttpResponse response = httpclient.execute(httppost);           
-			    HttpEntity entity = response.getEntity();
-
-			    inputStream = entity.getContent();
-			    // json is UTF-8 by default
-			    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
-			    StringBuilder sb = new StringBuilder();
-
-			    String line = null;
-			    while ((line = reader.readLine()) != null)
-			    {
-			        sb.append(line + "\n");
-			    }
-			    result = sb.toString();
-			} catch (Exception err) { 
-				Log.v(TAG, err.toString());
-			}
-			finally {
-			    try{if(inputStream != null)inputStream.close();}catch(Exception squish){}
-			}
-			
-		} catch (UnsupportedEncodingException err) {
-			// TODO Auto-generated catch block
-			Log.v(TAG, err.toString());
-		}
-
-		
-	}
+	
 
 
 
@@ -266,6 +230,15 @@ public class MainActivity extends Activity {
 		@Override
 		public void onLocationChanged(Location location) {
 			updateWithNewLocation(location);
+			try {
+				result = new GetWeatherInfo(query).execute().get();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		@Override
@@ -280,6 +253,7 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
+			
 			switch (status) {
 			case LocationProvider.OUT_OF_SERVICE:
 				Log.v(TAG, "Status Changed: Out of Service");
@@ -382,6 +356,7 @@ public class MainActivity extends Activity {
 			longitude_txt.setText("經度: " + lng);
 			latitude_txt.setText("緯度: " + lat);
 			lastUpdate_txt.setText(timeString);
+			
 			
 			
 
