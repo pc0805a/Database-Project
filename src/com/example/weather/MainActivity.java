@@ -15,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,7 +53,7 @@ public class MainActivity extends Activity {
 	private double lng;
 	private double lat;
 	
-	String result;
+	JSONObject result;
 	String query;
 
 	@Override
@@ -61,23 +62,16 @@ public class MainActivity extends Activity {
 		if (initLocationProvider()) {
 			whereAmI();
 		} else {
-			Toast.makeText(this, "½Ğ¶}±Ò©w¦ìªA°È", Toast.LENGTH_LONG).show();
-			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // ¶}±Ò³]©w­¶­±
+			Toast.makeText(this, "è«‹é–‹å•Ÿå®šä½æœå‹™", Toast.LENGTH_LONG).show();
+			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // é–‹å•Ÿè¨­å®šé é¢
 		}
       
 		query = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
 				+ lng + "," + lat + "\" and gflags=\"R\" )";
 		
+		Log.v(TAG, "YQL Query: "+query);
+		handleWeatherInfo();
 		
-		try {
-			result = new GetWeatherInfo(query).execute().get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		
 //		try {
@@ -105,7 +99,41 @@ public class MainActivity extends Activity {
 
 	}
 
-	
+	private void handleWeatherInfo()
+	{
+		try {
+			result = new GetWeatherInfo(query).execute().get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			
+
+			JSONObject jQuery = result.getJSONObject("query");
+			
+			JSONObject jResults = jQuery.getJSONObject("results");
+			JSONObject jChannel = jResults.getJSONObject("channel");
+			JSONObject jItem = jChannel.getJSONObject("item");
+			JSONObject jCondition = jItem.getJSONObject("condition");
+			String condition = jCondition.getString("text");
+			currentCondition_txt.setText(condition);
+			Log.v(TAG, jItem.toString());
+//			currentCondition_txt.setText(condition);
+			
+			
+		} catch (JSONException err) {
+			// TODO Auto-generated catch block
+			Log.v(TAG, "To JSON Object Fail  !!");
+		}
+		
+		
+		
+	}
 
 
 
@@ -113,12 +141,14 @@ public class MainActivity extends Activity {
 	private TextView longitude_txt;
 	private TextView latitude_txt;
 	private TextView lastUpdate_txt;
+	private TextView currentCondition_txt;
 
 	private void initViews() {
 		button_search = (Button) findViewById(R.id.button_search);
 		longitude_txt = (TextView) findViewById(R.id.lng);
 		latitude_txt = (TextView) findViewById(R.id.lat);
 		lastUpdate_txt = (TextView) findViewById(R.id.last_update);
+		currentCondition_txt = (TextView) findViewById(R.id.currentCondition);
 	}
 
 	private boolean initLocationProvider() {
@@ -129,7 +159,7 @@ public class MainActivity extends Activity {
 			if (locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 					|| locationMgr
 							.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				// ¿ï¾Ü³Ì¨Î´£¨Ñ¾¹
+				// é¸æ“‡æœ€ä½³æä¾›å™¨
 				Criteria criteria = new Criteria();
 				criteria.setAccuracy(Criteria.ACCURACY_FINE);
 				criteria.setAltitudeRequired(false);
@@ -157,7 +187,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void whereAmI() {
-		// ¨ú±o¤W¦¸¤wª¾ªº¦ì¸m
+		// å–å¾—ä¸Šæ¬¡å·²çŸ¥çš„ä½ç½®
 		Location location = locationMgr.getLastKnownLocation(provider);
 		updateWithNewLocation(location);
 
@@ -230,15 +260,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void onLocationChanged(Location location) {
 			updateWithNewLocation(location);
-			try {
-				result = new GetWeatherInfo(query).execute().get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			handleWeatherInfo();
 		}
 
 		@Override
@@ -339,29 +361,29 @@ public class MainActivity extends Activity {
 	private void updateWithNewLocation(Location location) {
 		String where = "";
 		if (location != null) {
-			// ¸g«×
+			// ç¶“åº¦
 			lng = location.getLongitude();
-			// ½n«×
+			// ç·¯åº¦
 			lat = location.getLatitude();
-			// ³t«×
+			// é€Ÿåº¦
 			float speed = location.getSpeed();
-			// ®É¶¡
+			// æ™‚é–“
 			long time = location.getTime();
 			String timeString = getTimeString(time);
 
-			where = "¸g«×: " + lng + "\n½n«×: " + lat + "\n³t«×: " + speed + "\n®É¶¡: "
+			where = "ç¶“åº¦: " + lng + "\nç·¯åº¦: " + lat + "\né€Ÿåº¦: " + speed + "\næ™‚é–“: "
 					+ timeString + "\nProvider: " + provider;
 
-			// "§Ú"
-			longitude_txt.setText("¸g«×: " + lng);
-			latitude_txt.setText("½n«×: " + lat);
+			// "æˆ‘"
+			longitude_txt.setText("ç¶“åº¦: " + lng);
+			latitude_txt.setText("ç·¯åº¦: " + lat);
 			lastUpdate_txt.setText(timeString);
 			
 			
 			
 
 		} else {
-			where = "µLªk¨ú±o¦a²z¸ê°T" + "\n­Y¦b«Ç¤º½Ğ¹Á¸Õ¨Ï¥Îºô¸ô©w¦ì";
+			where = "ç„¡æ³•å–å¾—åœ°ç†è³‡è¨Š" + "\nè‹¥åœ¨å®¤å…§è«‹å˜—è©¦ä½¿ç”¨ç¶²è·¯å®šä½";
 		}
 
 		Toast.makeText(this, where, Toast.LENGTH_LONG).show();

@@ -51,18 +51,32 @@
             android:text="緯度"
             android:textColor="@color/white"
             android:textSize="12sp" />
-
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView1"
+    <LinearLayout
+        android:id="@+id/CurrentCondition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="35dp"
-        android:layout_marginTop="25dp"
-        android:text="@string/current_weather_label"
-        android:textColor="@color/white"
-        android:textSize="18sp" />
+        android:layout_marginTop="25dp" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/current_weather_label"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/currentCondition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Large Text"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textView3"
@@ -131,7 +145,6 @@
             android:layout_gravity="center_vertical"
             android:text="@string/btn_unreliable"
             android:textColor="@color/white" />
-
     </LinearLayout>
 
     <TextView

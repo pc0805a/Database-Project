@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -20,11 +21,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-public class GetWeatherInfo extends AsyncTask<Void, Void, String> {
+public class GetWeatherInfo extends AsyncTask<Void, Void, JSONObject> {
 	
 	private static final String TAG = MainActivity.class.getSimpleName();
 	String query;
 	String result;
+	JSONObject jArray = null;
 
 	GetWeatherInfo(String query)
 	{
@@ -32,10 +34,18 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String> {
 	}
 	
 	@Override
-	protected String doInBackground(Void... params) {
+	protected JSONObject doInBackground(Void... params) {
 		
 		getJson(query);
-		return result;
+		
+		try {
+			jArray = new JSONObject(result);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return jArray;
 	}
 	
 	private void getJson(String query) {
