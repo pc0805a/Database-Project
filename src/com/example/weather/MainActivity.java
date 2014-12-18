@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutionException;
 
@@ -54,8 +55,9 @@ public class MainActivity extends Activity {
 	private double lng;
 	private double lat;
 
-	JSONObject[] result;
+	String[] YQLresult;
 	String YQLquery;
+	JSONObject Gresult;
 	String Gquery;
 
 	@Override
@@ -68,21 +70,9 @@ public class MainActivity extends Activity {
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
 
-		YQLquery = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
-				+ lng + "," + lat + "\" and gflags=\"R\" )";
 
-		if (Debug.on)
-			Log.v(TAG, "YQL Query: " + YQLquery);
 
 		handleWeatherInfo();
-
-		// try {
-		// JSONObject jObject = new JSONObject(result);
-		//
-		// } catch (JSONException err) {
-		// // TODO Auto-generated catch block
-		// Log.v(TAG, err.toString());
-		// }
 
 	}
 
@@ -103,51 +93,51 @@ public class MainActivity extends Activity {
 
 	private void handleWeatherInfo() {
 		try {
-			result = new GetWeatherInfo(YQLquery, Gquery).execute().get();
+			YQLresult = new GetWeatherInfo(lng,lat).execute().get();
+			currentCondition_txt.setText(YQLresult[0]);
+			humidity_txt.setText(YQLresult[1]+"%");
+			DecimalFormat temp = new DecimalFormat( "#.0");
+			currentTemperature_txt.setText(temp.format((Double.parseDouble(YQLresult[2])-32)*5/9));
 		} catch (InterruptedException err) {
-			// TODO Auto-generated catch block
 			Log.e(TAG, "error: " + err.toString());
 		} catch (ExecutionException err) {
-			// TODO Auto-generated catch block
 			Log.e(TAG, "error: " + err.toString());
 		}
 
-		try {
-
-			JSONObject jQuery = result[0].getJSONObject("query");
-
-			JSONObject jResults = jQuery.getJSONObject("results");
-			JSONObject jChannel = jResults.getJSONObject("channel");
-			JSONObject jItem = jChannel.getJSONObject("item");
-			JSONObject jCondition = jItem.getJSONObject("condition");
-			String condition = jCondition.getString("text");
-			currentCondition_txt.setText(condition);
-			if (Debug.on)
-				Log.v(TAG, jItem.toString());
-			// currentCondition_txt.setText(condition);
-
-		} catch (JSONException err) {
-			// TODO Auto-generated catch block
-			if (Debug.on) {
-				Log.e(TAG, "error: " + err.toString());
-			}
-			
-		}
+		
 
 	}
+//	
+//	private void handleGeoName() {
+//		try {
+//			Gresult = new GetWeatherInfo(Gquery).execute().get();
+//		} catch (InterruptedException err) {
+//			// TODO Auto-generated catch block
+//			Log.e(TAG, "error: " + err.toString());
+//		} catch (ExecutionException err) {
+//			// TODO Auto-generated catch block
+//			Log.e(TAG, "error: " + err.toString());
+//		}
+//		
+//	}
+	
 
 	private Button button_search;
 	private TextView longitude_txt;
 	private TextView latitude_txt;
 	private TextView lastUpdate_txt;
 	private TextView currentCondition_txt;
+	private TextView humidity_txt;
+	private TextView currentTemperature_txt;
 
 	private void initViews() {
 		button_search = (Button) findViewById(R.id.button_search);
 		longitude_txt = (TextView) findViewById(R.id.lng);
 		latitude_txt = (TextView) findViewById(R.id.lat);
 		lastUpdate_txt = (TextView) findViewById(R.id.last_update);
-		currentCondition_txt = (TextView) findViewById(R.id.currentCondition);
+		currentCondition_txt = (TextView) findViewById(R.id.current_condition);
+		humidity_txt = (TextView) findViewById(R.id.humidity);
+		currentTemperature_txt = (TextView) findViewById(R.id.current_temperature);
 	}
 
 	private boolean initLocationProvider() {
@@ -214,9 +204,6 @@ public class MainActivity extends Activity {
 			try {
 				// bundle.putDouble("KEY_HEIGHT",
 				// Double.parseDouble(num_height.getText().toString()));
-				// bundle.putDouble("KEY_WEIGHT",
-				// Double.parseDouble(num_weight.getText().toString()));
-				// intent.putExtras(bundle);
 
 				startActivityForResult(intent, ACTIVITY_REPORT);
 			} catch (Exception err) {
@@ -262,6 +249,7 @@ public class MainActivity extends Activity {
 		public void onLocationChanged(Location location) {
 			updateWithNewLocation(location);
 			handleWeatherInfo();
+//			handleGeoName();
 		}
 
 		@Override
@@ -366,9 +354,10 @@ public class MainActivity extends Activity {
 			lng = location.getLongitude();
 			// 緯度
 			lat = location.getLatitude();
-//			if (Debug.on) {
+			Gquery = lat+","+lng;
+			if (Debug.on) {
 				Log.v(TAG, "Latitude: " + lat+ "\nLongitude: "+ lng);
-//			}
+			}
 			// 速度
 			float speed = location.getSpeed();
 			// 時間
