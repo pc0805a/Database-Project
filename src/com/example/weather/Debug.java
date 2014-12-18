@@ -3,5 +3,5 @@ package com.example.weather;
 
 
 public class Debug {
-	public static final boolean on = true;
+	public static final boolean on = false;
 }

@@ -21,85 +21,154 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-public class GetWeatherInfo extends AsyncTask<Void, Void, JSONObject> {
-	
-	private static final String TAG = MainActivity.class.getSimpleName();
-	String query;
-	String result;
-	JSONObject jArray = null;
+public class GetWeatherInfo extends AsyncTask<Void, Void, JSONObject[]> {
 
-	GetWeatherInfo(String query)
-	{
-		this.query = query;
+	private static final String TAG = MainActivity.class.getSimpleName();
+	String YQLquery;
+	String result;
+	JSONObject[] jObject = new JSONObject[2];
+
+	GetWeatherInfo(String YQLquery, String Gquery) {
+		this.YQLquery = YQLquery;
 	}
-	
+
 	@Override
-	protected JSONObject doInBackground(Void... params) {
-		
-		getJson(query);
-		
+	protected JSONObject[] doInBackground(Void... params) {
+
+		getWeather(YQLquery);
+
 		try {
-			jArray = new JSONObject(result);
-		} catch (JSONException e) {
+			jObject[0] = new JSONObject(result);
+		} catch (JSONException err) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (Debug.on) {
+				Log.e(TAG, "error: " + err.toString());
+			}
 		}
-		
-		return jArray;
+
+		return jObject;
 	}
-	
-	private void getJson(String query) {
+
+	private void getWeather(String query) {
 		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
-			
+
 		try {
-			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8") + "&format=json";
-			
+			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8")
+					+ "&format=json";
+
 			Log.v(TAG, "Total URL:" + totalUrl);
-			
-			
-			DefaultHttpClient   httpclient = new DefaultHttpClient(new BasicHttpParams());
+
+			DefaultHttpClient httpclient = new DefaultHttpClient(
+					new BasicHttpParams());
 			HttpPost httppost = new HttpPost(totalUrl);
-			
+
 			Log.v(TAG, "URI:" + httppost.getURI());
-			
-			
+
 			httppost.setHeader("Content-type", "application/json");
 
 			InputStream inputStream = null;
-			
+
 			try {
-			    HttpResponse response = httpclient.execute(httppost);           
-			    HttpEntity entity = response.getEntity();
+				HttpResponse response = httpclient.execute(httppost);
+				HttpEntity entity = response.getEntity();
 
-			    inputStream = entity.getContent();
-			    // json is UTF-8 by default
-			    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
-			    StringBuilder sb = new StringBuilder();
+				inputStream = entity.getContent();
+				// json is UTF-8 by default
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(inputStream, "UTF-8"), 8);
+				StringBuilder sb = new StringBuilder();
 
-			    String line = null;
-			    while ((line = reader.readLine()) != null)
-			    {
-			        sb.append(line + "\n");
-			    }
-			    result = sb.toString();
-			    Log.v(TAG,  "JSON result: "+result);
-			} catch (Exception err) { 
-				Log.v(TAG, err.toString());
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					sb.append(line + "\n");
+				}
+				result = sb.toString();
+				if (Debug.on) {
+					Log.v(TAG, "JSON result: " + result);
+				}
+			} catch (Exception err) {
+				if (Debug.on) {
+					Log.e(TAG, "error: " + err.toString());
+				}
+			} finally {
+				try {
+					if (inputStream != null)
+						inputStream.close();
+				} catch (Exception err) {
+					if (Debug.on) {
+						Log.e(TAG, "error: " + err.toString());
+					}
+				}
 			}
-			finally {
-			    try{if(inputStream != null)inputStream.close();}catch(Exception squish){}
-			}
-			
+
 		} catch (UnsupportedEncodingException err) {
 			// TODO Auto-generated catch block
-			Log.v(TAG, err.toString());
+			if (Debug.on) {
+				Log.e(TAG, "error: " + err.toString());
+			}
 		}
 
-		
 	}
 	
+	private void getGeoName(String query) {
+		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
 
+		try {
+			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8")
+					+ "&format=json";
 
-	
+			Log.v(TAG, "Total URL:" + totalUrl);
+
+			DefaultHttpClient httpclient = new DefaultHttpClient(
+					new BasicHttpParams());
+			HttpPost httppost = new HttpPost(totalUrl);
+
+			Log.v(TAG, "URI:" + httppost.getURI());
+
+			httppost.setHeader("Content-type", "application/json");
+
+			InputStream inputStream = null;
+
+			try {
+				HttpResponse response = httpclient.execute(httppost);
+				HttpEntity entity = response.getEntity();
+
+				inputStream = entity.getContent();
+				// json is UTF-8 by default
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(inputStream, "UTF-8"), 8);
+				StringBuilder sb = new StringBuilder();
+
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					sb.append(line + "\n");
+				}
+				result = sb.toString();
+				if (Debug.on) {
+					Log.v(TAG, "JSON result: " + result);
+				}
+			} catch (Exception err) {
+				if (Debug.on) {
+					Log.e(TAG, "error: " + err.toString());
+				}
+			} finally {
+				try {
+					if (inputStream != null)
+						inputStream.close();
+				} catch (Exception err) {
+					if (Debug.on) {
+						Log.e(TAG, "error: " + err.toString());
+					}
+				}
+			}
+
+		} catch (UnsupportedEncodingException err) {
+			// TODO Auto-generated catch block
+			if (Debug.on) {
+				Log.e(TAG, "error: " + err.toString());
+			}
+		}
+
+	}
 
 }

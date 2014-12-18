@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -52,9 +53,10 @@ public class MainActivity extends Activity {
 	private String provider;
 	private double lng;
 	private double lat;
-	
-	JSONObject result;
-	String query;
+
+	JSONObject[] result;
+	String YQLquery;
+	String Gquery;
 
 	@Override
 	protected void onStart() {
@@ -65,23 +67,23 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
-      
-		query = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
+
+		YQLquery = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
 				+ lng + "," + lat + "\" and gflags=\"R\" )";
-		
-		Log.v(TAG, "YQL Query: "+query);
+
+		if (Debug.on)
+			Log.v(TAG, "YQL Query: " + YQLquery);
+
 		handleWeatherInfo();
-		
-		
-		
-//		try {
-//			JSONObject jObject = new JSONObject(result);
-//
-//		} catch (JSONException err) {
-//			// TODO Auto-generated catch block
-//			Log.v(TAG, err.toString());
-//		}
-		
+
+		// try {
+		// JSONObject jObject = new JSONObject(result);
+		//
+		// } catch (JSONException err) {
+		// // TODO Auto-generated catch block
+		// Log.v(TAG, err.toString());
+		// }
+
 	}
 
 	@Override
@@ -99,43 +101,40 @@ public class MainActivity extends Activity {
 
 	}
 
-	private void handleWeatherInfo()
-	{
+	private void handleWeatherInfo() {
 		try {
-			result = new GetWeatherInfo(query).execute().get();
-		} catch (InterruptedException e) {
+			result = new GetWeatherInfo(YQLquery, Gquery).execute().get();
+		} catch (InterruptedException err) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
+			Log.e(TAG, "error: " + err.toString());
+		} catch (ExecutionException err) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(TAG, "error: " + err.toString());
 		}
-		
-		try {
-			
 
-			JSONObject jQuery = result.getJSONObject("query");
-			
+		try {
+
+			JSONObject jQuery = result[0].getJSONObject("query");
+
 			JSONObject jResults = jQuery.getJSONObject("results");
 			JSONObject jChannel = jResults.getJSONObject("channel");
 			JSONObject jItem = jChannel.getJSONObject("item");
 			JSONObject jCondition = jItem.getJSONObject("condition");
 			String condition = jCondition.getString("text");
 			currentCondition_txt.setText(condition);
-			Log.v(TAG, jItem.toString());
-//			currentCondition_txt.setText(condition);
-			
-			
+			if (Debug.on)
+				Log.v(TAG, jItem.toString());
+			// currentCondition_txt.setText(condition);
+
 		} catch (JSONException err) {
 			// TODO Auto-generated catch block
-			Log.v(TAG, "To JSON Object Fail  !!");
+			if (Debug.on) {
+				Log.e(TAG, "error: " + err.toString());
+			}
+			
 		}
-		
-		
-		
+
 	}
-
-
 
 	private Button button_search;
 	private TextView longitude_txt;
@@ -168,14 +167,16 @@ public class MainActivity extends Activity {
 				criteria.setPowerRequirement(Criteria.POWER_LOW);
 
 				provider = locationMgr.getBestProvider(criteria, true);
-
+				if(Debug.on)
 				Log.d(TAG, "My Provider:" + provider);
 
 				return true;
 			}
 
 		} catch (Exception err) {
-			Log.e(TAG, "error: " + err.toString());
+			if (Debug.on) {
+				Log.e(TAG, "error: " + err.toString());
+			}
 		}
 
 		return false;
@@ -275,7 +276,7 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
-			
+
 			switch (status) {
 			case LocationProvider.OUT_OF_SERVICE:
 				Log.v(TAG, "Status Changed: Out of Service");
@@ -365,6 +366,9 @@ public class MainActivity extends Activity {
 			lng = location.getLongitude();
 			// 緯度
 			lat = location.getLatitude();
+//			if (Debug.on) {
+				Log.v(TAG, "Latitude: " + lat+ "\nLongitude: "+ lng);
+//			}
 			// 速度
 			float speed = location.getSpeed();
 			// 時間
@@ -378,9 +382,6 @@ public class MainActivity extends Activity {
 			longitude_txt.setText("經度: " + lng);
 			latitude_txt.setText("緯度: " + lat);
 			lastUpdate_txt.setText(timeString);
-			
-			
-			
 
 		} else {
 			where = "無法取得地理資訊" + "\n若在室內請嘗試使用網路定位";
@@ -390,6 +391,7 @@ public class MainActivity extends Activity {
 
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	private String getTimeString(long timeInMilliseconds) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return format.format(timeInMilliseconds);
