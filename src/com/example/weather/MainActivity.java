@@ -1,10 +1,8 @@
 package com.example.weather;
 
-
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutionException;
-
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -38,8 +36,8 @@ public class MainActivity extends Activity {
 
 	private LocationManager locationMgr;
 	private String provider;
-	private double lng=-99999;
-	private double lat=-99999;
+	private double lng = -99999;
+	private double lat = -99999;
 
 	String[] YQLresult;
 	String YQLquery;
@@ -54,10 +52,6 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
-
-
-
-		
 
 	}
 
@@ -78,33 +72,34 @@ public class MainActivity extends Activity {
 
 	private void handleWeatherInfo() {
 		try {
-			YQLresult = new GetWeatherInfo(lng,lat).execute().get();
+			YQLresult = new GetWeatherInfo(lng, lat).execute().get();
 			currentCondition_txt.setText(YQLresult[0]);
-			humidity_txt.setText(YQLresult[1]+"%");
-			DecimalFormat temp = new DecimalFormat( "#.0");
-			currentTemperature_txt.setText(temp.format((Double.parseDouble(YQLresult[2])-32)*5/9));
+			humidity_txt.setText(YQLresult[1] + "%");
+			DecimalFormat temp = new DecimalFormat("#.0");
+			currentTemperature_txt.setText(temp.format((Double
+					.parseDouble(YQLresult[2]) - 32) * 5 / 9));
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
 		} catch (ExecutionException err) {
 			Log.e(TAG, "error: " + err.toString());
 		}
 
-		
-
 	}
-	
+
 	private void handleGeoName() {
 		try {
-			geoNameResult = new GetGeoName(lng,lat).execute().get();
+			geoNameResult = new GetGeoName(lng, lat).execute().get();
+//			if (Debug.on) {
+				woeid_txt.setText("WOEID: " + YQLresult[3]);
+//			}
 			currentLocation_txt.setText(geoNameResult);
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
 		} catch (ExecutionException err) {
 			Log.e(TAG, "error: " + err.toString());
 		}
-		
+
 	}
-	
 
 	private Button button_search;
 	private TextView longitude_txt;
@@ -114,6 +109,7 @@ public class MainActivity extends Activity {
 	private TextView humidity_txt;
 	private TextView currentTemperature_txt;
 	private TextView currentLocation_txt;
+	private TextView woeid_txt;
 
 	private void initViews() {
 		button_search = (Button) findViewById(R.id.button_search);
@@ -124,6 +120,7 @@ public class MainActivity extends Activity {
 		humidity_txt = (TextView) findViewById(R.id.humidity);
 		currentTemperature_txt = (TextView) findViewById(R.id.current_temperature);
 		currentLocation_txt = (TextView) findViewById(R.id.current_location);
+		woeid_txt = (TextView) findViewById(R.id.woeid);
 	}
 
 	private boolean initLocationProvider() {
@@ -143,15 +140,15 @@ public class MainActivity extends Activity {
 				criteria.setPowerRequirement(Criteria.POWER_LOW);
 
 				provider = locationMgr.getBestProvider(criteria, true);
-				if(Debug.on)
-				Log.d(TAG, "My Provider:" + provider);
+				if (Debug.on)
+					Log.d(TAG, "My Provider:" + provider);
 
 				return true;
 			}
 
 		} catch (Exception err) {
 
-				Log.e(TAG, "error: " + err.toString());
+			Log.e(TAG, "error: " + err.toString());
 
 		}
 
@@ -193,7 +190,7 @@ public class MainActivity extends Activity {
 
 				startActivityForResult(intent, ACTIVITY_REPORT);
 			} catch (Exception err) {
-					Log.e(TAG, "error: " + err.toString());
+				Log.e(TAG, "error: " + err.toString());
 				Toast.makeText(MainActivity.this, R.string.input_error,
 						Toast.LENGTH_SHORT).show();
 			}
@@ -208,9 +205,10 @@ public class MainActivity extends Activity {
 			switch (event) {
 			case GpsStatus.GPS_EVENT_STARTED:
 				Log.d(TAG, "GPS_EVENT_STARTED");
-				Toast.makeText(MainActivity.this, "GPS_EVENT_STARTED",						
+				Toast.makeText(MainActivity.this, "GPS_EVENT_STARTED",
 						Toast.LENGTH_SHORT).show();
-				Toast.makeText(MainActivity.this,"若長時間無法取得地理資訊, 請嘗試使用網路定位", Toast.LENGTH_LONG).show();
+				Toast.makeText(MainActivity.this, "若長時間無法取得地理資訊, 請嘗試使用網路定位",
+						Toast.LENGTH_LONG).show();
 				break;
 			case GpsStatus.GPS_EVENT_STOPPED:
 				Log.d(TAG, "GPS_EVENT_STOPPED");
@@ -235,7 +233,7 @@ public class MainActivity extends Activity {
 			updateWithNewLocation(location);
 			handleWeatherInfo();
 			handleGeoName();
-//			handleGeoName();
+			// handleGeoName();
 		}
 
 		@Override
@@ -340,9 +338,9 @@ public class MainActivity extends Activity {
 			lng = location.getLongitude();
 			// 緯度
 			lat = location.getLatitude();
-			
+
 			if (Debug.on) {
-				Log.v(TAG, "Latitude: " + lat+ "\nLongitude: "+ lng);
+				Log.v(TAG, "Latitude: " + lat + "\nLongitude: " + lng);
 			}
 			// 速度
 			float speed = location.getSpeed();

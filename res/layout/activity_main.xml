@@ -64,6 +64,20 @@
             android:textSize="12sp" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/woeid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="0dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:padding="0dp"
+        android:text=""
+        android:textColor="@color/white"
+        android:textSize="12sp" />
+
     <LinearLayout
         android:id="@+id/CurrentCondition"
         android:layout_width="wrap_content"

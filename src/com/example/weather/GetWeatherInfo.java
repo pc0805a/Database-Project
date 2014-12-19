@@ -26,7 +26,9 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 	double lat;
 
 	String YQLresult;
-	String[] result = new String[3];
+	String woeidResult;
+	
+	String[] result = new String[4];
 
 	GetWeatherInfo(double lng, double lat) {
 		this.lng = lng;
@@ -37,21 +39,44 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 	@Override
 	protected String[] doInBackground(Void... params) {
 
-		String YQLquery = "select * from weather.forecast where woeid in (select woeid from geo.placefinder where text=\""
-				+ lng + "," + lat + "\" and gflags=\"R\" )";
+		String woeidQuery = "select woeid from geo.placefinder where text=\""
+				+ lng + "," + lat + "\" and gflags=\"R\"";
+		if (Debug.on) {
+			Log.v(TAG, "WOEID Query: " + woeidQuery);
+		}
+		getWOEID(woeidQuery);
+
+		String YQLquery = "select * from weather.forecast where woeid in ("
+				+ woeidQuery + " )";
 		if (Debug.on) {
 			Log.v(TAG, "YQL Query: " + YQLquery);
 		}
-
 		getWeather(YQLquery);
 
 		try {
-			JSONObject jObject = new JSONObject(YQLresult);
+			JSONObject jObject = new JSONObject(woeidResult);
 			JSONObject jQuery = jObject.getJSONObject("query");
 			JSONObject jResults = jQuery.getJSONObject("results");
-			JSONObject jChannel = jResults.getJSONObject("channel");
-			JSONObject jItem = jChannel.getJSONObject("item");
-			JSONObject jCondition = jItem.getJSONObject("condition");
+
+			String woeid = jResults.getJSONObject("Result").getString("woeid");
+
+			if (Debug.on) {
+				Log.v(TAG, "WOEID: " + woeid);
+			}
+
+			result[3] = woeid;
+
+			jObject = new JSONObject(YQLresult);
+			jQuery = jObject.getJSONObject("query");
+			jResults = jQuery.getJSONObject("results");
+
+			JSONObject jChannel;
+			JSONObject jItem;
+			JSONObject jCondition;
+
+			jChannel = jResults.getJSONObject("channel");
+			jItem = jChannel.getJSONObject("item");
+			jCondition = jItem.getJSONObject("condition");
 
 			String condition = jCondition.getString("text");
 			weatherCode = Integer.parseInt(jCondition.getString("code"));
@@ -60,9 +85,9 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 			JSONObject jAtom = jChannel.getJSONObject("atmosphere");
 			String humidity = jAtom.getString("humidity");
 			if (Debug.on) {
-				Log.v(TAG, "condition: " + condition.toString());
-				Log.v(TAG, "humidity: " + humidity.toString());
-				Log.v(TAG, "temperature: " + temperature.toString());
+				Log.v(TAG, "condition: " + condition);
+				Log.v(TAG, "humidity: " + humidity);
+				Log.v(TAG, "temperature: " + temperature);
 			}
 			result[0] = condition;
 			weatherNameSet(result[0]);
@@ -117,6 +142,67 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 				if (Debug.on) {
 					Log.v(TAG, "YQL result: " + YQLresult);
 				}
+			} catch (Exception err) {
+				Log.e(TAG, "error: " + err.toString());
+			} finally {
+				try {
+					if (inputStream != null)
+						inputStream.close();
+				} catch (Exception err) {
+					if (Debug.on) {
+						Log.e(TAG, "error: " + err.toString());
+					}
+				}
+			}
+
+		} catch (UnsupportedEncodingException err) {
+			Log.e(TAG, "error: " + err.toString());
+		}
+
+	}
+
+	private void getWOEID(String query) {
+		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
+
+		try {
+			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8")
+					+ "&format=json";
+
+			if (Debug.on) {
+				Log.v(TAG, "Total URL:" + totalUrl);
+			}
+
+			DefaultHttpClient httpclient = new DefaultHttpClient(
+					new BasicHttpParams());
+			HttpPost httppost = new HttpPost(totalUrl);
+
+			if (Debug.on) {
+				Log.v(TAG, "URI:" + httppost.getURI());
+			}
+
+			httppost.setHeader("Content-type", "application/json");
+
+			InputStream inputStream = null;
+
+			try {
+				HttpResponse response = httpclient.execute(httppost);
+				HttpEntity entity = response.getEntity();
+
+				inputStream = entity.getContent();
+				// json is UTF-8 by default
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(inputStream, "UTF-8"), 8);
+				StringBuilder sb = new StringBuilder();
+
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					sb.append(line + "\n");
+				}
+				woeidResult = sb.toString();
+				if (Debug.on) {
+					Log.v(TAG, "WOEID result: " + woeidResult);
+				}
+
 			} catch (Exception err) {
 				Log.e(TAG, "error: " + err.toString());
 			} finally {
