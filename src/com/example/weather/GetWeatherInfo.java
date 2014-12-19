@@ -73,10 +73,7 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 			result[2] = temperature;// f
 
 		} catch (JSONException err) {
-			// TODO Auto-generated catch block
-			if (Debug.on) {
-				Log.e(TAG, "error: " + err.toString());
-			}
+			Log.e(TAG, "error: " + err.toString());
 		}
 
 		return result;
@@ -124,9 +121,7 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 					Log.v(TAG, "YQL result: " + YQLresult);
 				}
 			} catch (Exception err) {
-				if (Debug.on) {
-					Log.e(TAG, "error: " + err.toString());
-				}
+				Log.e(TAG, "error: " + err.toString());
 			} finally {
 				try {
 					if (inputStream != null)
@@ -139,10 +134,7 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 			}
 
 		} catch (UnsupportedEncodingException err) {
-			// TODO Auto-generated catch block
-			if (Debug.on) {
-				Log.e(TAG, "error: " + err.toString());
-			}
+			Log.e(TAG, "error: " + err.toString());
 		}
 
 	}
@@ -299,7 +291,7 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 			result[0] = "無法使用";
 			break;
 		default:
-			Log.e(TAG, "error: Don't have this weather condition!?" );
+			Log.e(TAG, "error: Don't have this weather condition!?");
 		}
 	}
 

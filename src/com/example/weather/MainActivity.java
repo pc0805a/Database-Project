@@ -57,8 +57,7 @@ public class MainActivity extends Activity {
 
 	String[] YQLresult;
 	String YQLquery;
-	JSONObject Gresult;
-	String Gquery;
+	String geoNameResult;
 
 	@Override
 	protected void onStart() {
@@ -107,19 +106,18 @@ public class MainActivity extends Activity {
 		
 
 	}
-//	
-//	private void handleGeoName() {
-//		try {
-//			Gresult = new GetWeatherInfo(Gquery).execute().get();
-//		} catch (InterruptedException err) {
-//			// TODO Auto-generated catch block
-//			Log.e(TAG, "error: " + err.toString());
-//		} catch (ExecutionException err) {
-//			// TODO Auto-generated catch block
-//			Log.e(TAG, "error: " + err.toString());
-//		}
-//		
-//	}
+	
+	private void handleGeoName() {
+		try {
+			geoNameResult = new GetGeoName(lng,lat).execute().get();
+			currentLocation_txt.setText(geoNameResult);
+		} catch (InterruptedException err) {
+			Log.e(TAG, "error: " + err.toString());
+		} catch (ExecutionException err) {
+			Log.e(TAG, "error: " + err.toString());
+		}
+		
+	}
 	
 
 	private Button button_search;
@@ -129,6 +127,7 @@ public class MainActivity extends Activity {
 	private TextView currentCondition_txt;
 	private TextView humidity_txt;
 	private TextView currentTemperature_txt;
+	private TextView currentLocation_txt;
 
 	private void initViews() {
 		button_search = (Button) findViewById(R.id.button_search);
@@ -138,6 +137,7 @@ public class MainActivity extends Activity {
 		currentCondition_txt = (TextView) findViewById(R.id.current_condition);
 		humidity_txt = (TextView) findViewById(R.id.humidity);
 		currentTemperature_txt = (TextView) findViewById(R.id.current_temperature);
+		currentLocation_txt = (TextView) findViewById(R.id.current_location);
 	}
 
 	private boolean initLocationProvider() {
@@ -164,9 +164,9 @@ public class MainActivity extends Activity {
 			}
 
 		} catch (Exception err) {
-			if (Debug.on) {
+
 				Log.e(TAG, "error: " + err.toString());
-			}
+
 		}
 
 		return false;
@@ -207,9 +207,7 @@ public class MainActivity extends Activity {
 
 				startActivityForResult(intent, ACTIVITY_REPORT);
 			} catch (Exception err) {
-				if (Debug.on) {
 					Log.e(TAG, "error: " + err.toString());
-				}
 				Toast.makeText(MainActivity.this, R.string.input_error,
 						Toast.LENGTH_SHORT).show();
 			}
@@ -250,6 +248,7 @@ public class MainActivity extends Activity {
 		public void onLocationChanged(Location location) {
 			updateWithNewLocation(location);
 			handleWeatherInfo();
+			handleGeoName();
 //			handleGeoName();
 		}
 
@@ -355,7 +354,7 @@ public class MainActivity extends Activity {
 			lng = location.getLongitude();
 			// 緯度
 			lat = location.getLatitude();
-			Gquery = lat+","+lng;
+			
 			if (Debug.on) {
 				Log.v(TAG, "Latitude: " + lat+ "\nLongitude: "+ lng);
 			}
