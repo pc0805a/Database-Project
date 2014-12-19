@@ -52,8 +52,8 @@ public class MainActivity extends Activity {
 
 	private LocationManager locationMgr;
 	private String provider;
-	private double lng;
-	private double lat;
+	private double lng=-99999;
+	private double lat=-99999;
 
 	String[] YQLresult;
 	String YQLquery;
@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 
 
 
-		handleWeatherInfo();
+		
 
 	}
 
@@ -224,8 +224,9 @@ public class MainActivity extends Activity {
 			switch (event) {
 			case GpsStatus.GPS_EVENT_STARTED:
 				Log.d(TAG, "GPS_EVENT_STARTED");
-				Toast.makeText(MainActivity.this, "GPS_EVENT_STARTED",
+				Toast.makeText(MainActivity.this, "GPS_EVENT_STARTED",						
 						Toast.LENGTH_SHORT).show();
+				Toast.makeText(MainActivity.this,"若長時間無法取得地理資訊, 請嘗試使用網路定位", Toast.LENGTH_LONG).show();
 				break;
 			case GpsStatus.GPS_EVENT_STOPPED:
 				Log.d(TAG, "GPS_EVENT_STOPPED");
