@@ -52,6 +52,8 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
+		
+		new GetDbInfo("123").execute();
 
 	}
 
