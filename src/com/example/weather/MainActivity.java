@@ -89,9 +89,9 @@ public class MainActivity extends Activity {
 	private void handleGeoName() {
 		try {
 			geoNameResult = new GetGeoName(lng, lat).execute().get();
-//			if (Debug.on) {
-				woeid_txt.setText("WOEID: " + YQLresult[3]);
-//			}
+			// if (Debug.on) {
+			woeid_txt.setText("WOEID: " + YQLresult[3]);
+			// }
 			currentLocation_txt.setText(geoNameResult);
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
@@ -101,7 +101,9 @@ public class MainActivity extends Activity {
 
 	}
 
-	private Button button_search;
+	private Button search_btn;
+	private Button reliable_btn;
+	private Button unreliable_btn;
 	private TextView longitude_txt;
 	private TextView latitude_txt;
 	private TextView lastUpdate_txt;
@@ -112,7 +114,9 @@ public class MainActivity extends Activity {
 	private TextView woeid_txt;
 
 	private void initViews() {
-		button_search = (Button) findViewById(R.id.button_search);
+		search_btn = (Button) findViewById(R.id.search_btn);
+		reliable_btn = (Button) findViewById(R.id.reliable_btn);
+		unreliable_btn = (Button) findViewById(R.id.unreliable_btn);
 		longitude_txt = (TextView) findViewById(R.id.lng);
 		latitude_txt = (TextView) findViewById(R.id.lat);
 		lastUpdate_txt = (TextView) findViewById(R.id.last_update);
@@ -157,7 +161,9 @@ public class MainActivity extends Activity {
 	}
 
 	private void setListeners() {
-		button_search.setOnClickListener(search);
+		search_btn.setOnClickListener(search);
+		reliable_btn.setOnClickListener(reliable);
+		unreliable_btn.setOnClickListener(unreliable);
 	}
 
 	private void whereAmI() {
@@ -195,6 +201,22 @@ public class MainActivity extends Activity {
 						Toast.LENGTH_SHORT).show();
 			}
 
+		}
+
+	};
+
+	private OnClickListener reliable = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+		}
+
+	};
+
+	private OnClickListener unreliable = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
 		}
 
 	};
@@ -296,10 +318,6 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void get_current_local_info() {
-
-	}
-
 	public void openOptionsDialog() {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
 		dialog.setTitle(R.string.about_title);
@@ -327,24 +345,20 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 	}
 
 	private void updateWithNewLocation(Location location) {
 		String where = "";
 		if (location != null) {
-			// 經度
 			lng = location.getLongitude();
-			// 緯度
 			lat = location.getLatitude();
 
 			if (Debug.on) {
 				Log.v(TAG, "Latitude: " + lat + "\nLongitude: " + lng);
 			}
-			// 速度
+			
 			float speed = location.getSpeed();
-			// 時間
 			long time = location.getTime();
 			String timeString = getTimeString(time);
 
