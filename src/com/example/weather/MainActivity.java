@@ -42,6 +42,14 @@ public class MainActivity extends Activity {
 	String[] YQLresult;
 	String YQLquery;
 	String geoNameResult;
+	String[] DBresult;
+
+	String woeid;
+	String reliableCount;
+	String unreliableCount;
+	String totalReliableCount;
+	String totalUnreliableCount;
+	String lastUpdate;
 
 	@Override
 	protected void onStart() {
@@ -52,8 +60,6 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); // 開啟設定頁面
 		}
-		
-		new GetDbInfo("123").execute();
 
 	}
 
@@ -103,6 +109,56 @@ public class MainActivity extends Activity {
 
 	}
 
+	private void handleDbInfo() {
+		try {
+			DBresult = new GetDbInfo(YQLresult[3]).execute().get();
+
+			woeid = DBresult[0];
+			reliableCount = DBresult[1];
+			unreliableCount = DBresult[2];
+			totalReliableCount = DBresult[3];
+			totalUnreliableCount = DBresult[4];
+			lastUpdate = DBresult[5];
+
+			// if (Debug.on) {
+			Log.v(TAG, "WOEID: " + DBresult[0]);
+			Log.v(TAG, "Reliable Count: " + DBresult[1]);
+			Log.v(TAG, "Unreliable Count: " + DBresult[2]);
+			Log.v(TAG, "Total Reliable Count: " + DBresult[3]);
+			Log.v(TAG, "Total Unreliable Count: " + DBresult[4]);
+			Log.v(TAG, "Last Update: " + DBresult[5] + " " + DBresult[6]);
+			// }
+
+			double tempTotalRe;
+			if ((Double.parseDouble(totalReliableCount) + Double
+					.parseDouble(totalUnreliableCount)) == 0) {
+				tempTotalRe = 0;
+			} else {
+				DecimalFormat temp = new DecimalFormat("#.0");
+				tempTotalRe = Double.parseDouble(totalReliableCount)
+						/ (Double.parseDouble(totalReliableCount) + Double
+								.parseDouble(totalUnreliableCount)) * 100;
+				temp.format(tempTotalRe);
+
+			}
+
+			if (Debug.on) {
+				Log.v(TAG, "Reliability:" + tempTotalRe + "%");
+			}
+			DecimalFormat temp = new DecimalFormat("#0.0");
+
+			reliability_txt.setText(temp.format(tempTotalRe) + "%");
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	private Button search_btn;
 	private Button reliable_btn;
 	private Button unreliable_btn;
@@ -114,6 +170,7 @@ public class MainActivity extends Activity {
 	private TextView currentTemperature_txt;
 	private TextView currentLocation_txt;
 	private TextView woeid_txt;
+	private TextView reliability_txt;
 
 	private void initViews() {
 		search_btn = (Button) findViewById(R.id.search_btn);
@@ -127,6 +184,7 @@ public class MainActivity extends Activity {
 		currentTemperature_txt = (TextView) findViewById(R.id.current_temperature);
 		currentLocation_txt = (TextView) findViewById(R.id.current_location);
 		woeid_txt = (TextView) findViewById(R.id.woeid);
+		reliability_txt = (TextView) findViewById(R.id.reliability_txt);
 	}
 
 	private boolean initLocationProvider() {
@@ -211,6 +269,7 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
+
 		}
 
 	};
@@ -257,7 +316,8 @@ public class MainActivity extends Activity {
 			updateWithNewLocation(location);
 			handleWeatherInfo();
 			handleGeoName();
-			// handleGeoName();
+			handleDbInfo();
+
 		}
 
 		@Override
@@ -359,7 +419,7 @@ public class MainActivity extends Activity {
 			if (Debug.on) {
 				Log.v(TAG, "Latitude: " + lat + "\nLongitude: " + lng);
 			}
-			
+
 			float speed = location.getSpeed();
 			long time = location.getTime();
 			String timeString = getTimeString(time);

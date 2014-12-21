@@ -34,7 +34,7 @@ public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
 
 	private String baseURL = "http://pc0805a.lionfree.net/weather/getDbInfo.php?";
 	int woeid;
-	private String[] result;
+	private String[] result = new String[7];
 
 	GetDbInfo(String woeid) {
 		this.woeid = Integer.parseInt(woeid);
@@ -72,9 +72,11 @@ public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
 			org.jsoup.nodes.Document doc = Jsoup.parse(sb.toString());
 
 			String plainText = doc.body().text();
-//			if (Debug.on) {
+			if (Debug.on) {
 				Log.v(TAG, "Plain Text: " + plainText);
-//			}
+			}
+				
+				result = plainText.split(" ");
 
 		} catch (Exception err) {
 			Log.e(TAG, "error: " + err.toString());
@@ -88,8 +90,11 @@ public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
 				}
 			}
 		}
+		
+		
+		
 
-		return null;
+		return result;
 
 	}
 }

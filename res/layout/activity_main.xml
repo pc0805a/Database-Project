@@ -185,7 +185,6 @@
             android:layout_margin="0dp"
             android:layout_weight="0.1"
             android:src="@drawable/c" />
-
     </LinearLayout>
 
     <TextView
@@ -219,13 +218,33 @@
             android:text="@string/btn_reliable"
             android:textColor="@color/white" />
 
-        <TextView
-            android:id="@+id/textView6"
+        <LinearLayout
+            android:id="@+id/ReliabilityCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:text="                       "
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/reliability_lable"
+                android:layout_width="122dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="@string/reliability_lable"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/reliability_txt"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center|center_horizontal"
+                android:text="                       "
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/unreliable_btn"
