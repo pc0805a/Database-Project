@@ -44,11 +44,11 @@ public class MainActivity extends Activity {
 	String geoNameResult;
 	String[] DBresult;
 
-	String woeid;
-	String reliableCount;
-	String unreliableCount;
-	String totalReliableCount;
-	String totalUnreliableCount;
+	String woeid = "-1";
+	String reliableCount = "0";
+	String unreliableCount = "0";
+	String totalReliableCount = "0";
+	String totalUnreliableCount = "0";
 	String lastUpdate;
 
 	@Override
@@ -274,11 +274,16 @@ public class MainActivity extends Activity {
 			totalReliableCount = Integer.toString(Integer
 					.parseInt(totalReliableCount) + 1);
 
-			new ReliabilityButtonsAction(woeid, reliableCount, unreliableCount,
-					totalReliableCount, totalUnreliableCount, lastUpdate)
-					.execute();
+			if (woeid != "-1" && DBresult != null) {
+				new ReliabilityButtonsAction(woeid, reliableCount,
+						unreliableCount, totalReliableCount,
+						totalUnreliableCount, lastUpdate).execute();
 
-			handleDbInfo();
+				handleDbInfo();
+			} else {
+				Toast.makeText(MainActivity.this, "尚未取得地區資訊",
+						Toast.LENGTH_SHORT).show();
+			}
 
 		}
 
@@ -293,11 +298,17 @@ public class MainActivity extends Activity {
 			totalUnreliableCount = Integer.toString(Integer
 					.parseInt(totalUnreliableCount) + 1);
 
-			new ReliabilityButtonsAction(woeid, reliableCount, unreliableCount,
-					totalReliableCount, totalUnreliableCount, lastUpdate)
-					.execute();
+			if (woeid != "-1" && DBresult != null) {
+				new ReliabilityButtonsAction(woeid, reliableCount,
+						unreliableCount, totalReliableCount,
+						totalUnreliableCount, lastUpdate).execute();
 
-			handleDbInfo();
+				handleDbInfo();
+			} else {
+				Toast.makeText(MainActivity.this, "尚未取得地區資訊",
+						Toast.LENGTH_SHORT).show();
+			}
+
 		}
 
 	};
@@ -455,8 +466,9 @@ public class MainActivity extends Activity {
 		} else {
 			where = "無法取得地理資訊" + "\n若在室內請嘗試使用網路定位";
 		}
-
-		Toast.makeText(this, where, Toast.LENGTH_LONG).show();
+		if (Debug.on) {
+			Toast.makeText(this, where, Toast.LENGTH_LONG).show();
+		}
 
 	}
 
