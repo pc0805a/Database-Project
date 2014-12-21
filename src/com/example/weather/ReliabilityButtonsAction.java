@@ -1,57 +1,65 @@
 package com.example.weather;
 
 import java.io.BufferedReader;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
+import org.jsoup.Jsoup;
 
 import android.os.AsyncTask;
-import android.provider.DocumentsContract.Document;
 import android.util.Log;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.*;
+import android.view.View;
+import android.view.View.OnClickListener;
 
-public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
+public class ReliabilityButtonsAction extends AsyncTask<Void, Void, Void> {
 
 	private static final String TAG = GetDbInfo.class.getSimpleName();
+	
+	private String baseURL = "http://pc0805a.lionfree.net/weather/reliability.php?";
+	
+	String woeid;
+	String reliableCount;
+	String unreliableCount;
+	String totalReliableCount;
+	String totalUnreliableCount;
+	String lastUpdate;
 
-	private String baseURL = "http://pc0805a.lionfree.net/weather/getDbInfo.php?";
-	int woeid;
-	private String[] result = new String[7];
+	ReliabilityButtonsAction(String woeid, String reliableCount,
+			String unreliableCount, String totalReliableCount, String totalUnreliableCount,
+			String lastUpdate) {
+		this.woeid = woeid;
+		this.reliableCount = reliableCount;
+		this.unreliableCount = unreliableCount;
+		this.totalReliableCount = totalReliableCount;
+		this.totalUnreliableCount = totalUnreliableCount;
+		this.lastUpdate = lastUpdate;
 
-	GetDbInfo(String woeid) {
-		this.woeid = Integer.parseInt(woeid);
 	}
 
 	@Override
-	protected String[] doInBackground(Void... params) {
-
-		String link = "http://pc0805a.lionfree.net/weather/getDbInfo.php?woeid="
-				+ woeid;
-
+	protected Void doInBackground(Void... params) {
+		
+		String link = "http://pc0805a.lionfree.net/weather/reliability.php?"+
+				"woeid=" + woeid +
+				"&reliableCount=" + reliableCount +
+				"&unreliableCount=" + unreliableCount+
+				"&totalReliableCount=" + totalReliableCount+
+				"&totalUnreliableCount=" + totalUnreliableCount;
+		if (Debug.on) {
+			Log.v(TAG, "Total Link:" + link);
+		}
+		
 		DefaultHttpClient httpclient = new DefaultHttpClient(
 				new BasicHttpParams());
 		HttpPost httppost = new HttpPost(link);
 
 		InputStream inputStream = null;
-
+		
 		try {
 			HttpResponse response = httpclient.execute(httppost);
 			HttpEntity entity = response.getEntity();
@@ -75,10 +83,6 @@ public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
 			if (Debug.on) {
 				Log.v(TAG, "Plain Text: " + plainText);
 			}
-				
-				result = plainText.split(" ");
-				
-
 		} catch (Exception err) {
 			Log.e(TAG, "error: " + err.toString());
 		} finally {
@@ -94,8 +98,8 @@ public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
 		
 		
 		
-
-		return result;
+		return null;
 
 	}
+
 }

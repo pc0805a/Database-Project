@@ -242,7 +242,8 @@
                 android:gravity="center|center_horizontal"
                 android:text="                       "
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="15sp" />
 
         </LinearLayout>
 

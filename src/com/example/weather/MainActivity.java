@@ -118,23 +118,23 @@ public class MainActivity extends Activity {
 			unreliableCount = DBresult[2];
 			totalReliableCount = DBresult[3];
 			totalUnreliableCount = DBresult[4];
-			lastUpdate = DBresult[5];
+			lastUpdate = DBresult[5] + " " + DBresult[6];
 
-			// if (Debug.on) {
-			Log.v(TAG, "WOEID: " + DBresult[0]);
-			Log.v(TAG, "Reliable Count: " + DBresult[1]);
-			Log.v(TAG, "Unreliable Count: " + DBresult[2]);
-			Log.v(TAG, "Total Reliable Count: " + DBresult[3]);
-			Log.v(TAG, "Total Unreliable Count: " + DBresult[4]);
-			Log.v(TAG, "Last Update: " + DBresult[5] + " " + DBresult[6]);
-			// }
+			if (Debug.on) {
+				Log.v(TAG, "WOEID: " + woeid);
+				Log.v(TAG, "Reliable Count: " + reliableCount);
+				Log.v(TAG, "Unreliable Count: " + unreliableCount);
+				Log.v(TAG, "Total Reliable Count: " + totalReliableCount);
+				Log.v(TAG, "Total Unreliable Count: " + totalUnreliableCount);
+				Log.v(TAG, "Last Update: " + lastUpdate);
+			}
 
 			double tempTotalRe;
 			if ((Double.parseDouble(totalReliableCount) + Double
 					.parseDouble(totalUnreliableCount)) == 0) {
 				tempTotalRe = 0;
 			} else {
-				DecimalFormat temp = new DecimalFormat("#.0");
+				DecimalFormat temp = new DecimalFormat("#0.0");
 				tempTotalRe = Double.parseDouble(totalReliableCount)
 						/ (Double.parseDouble(totalReliableCount) + Double
 								.parseDouble(totalUnreliableCount)) * 100;
@@ -269,6 +269,16 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
+			reliableCount = Integer
+					.toString(Integer.parseInt(reliableCount) + 1);
+			totalReliableCount = Integer.toString(Integer
+					.parseInt(totalReliableCount) + 1);
+
+			new ReliabilityButtonsAction(woeid, reliableCount, unreliableCount,
+					totalReliableCount, totalUnreliableCount, lastUpdate)
+					.execute();
+
+			handleDbInfo();
 
 		}
 
@@ -278,6 +288,16 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
+			unreliableCount = Integer.toString(Integer
+					.parseInt(unreliableCount) + 1);
+			totalUnreliableCount = Integer.toString(Integer
+					.parseInt(totalUnreliableCount) + 1);
+
+			new ReliabilityButtonsAction(woeid, reliableCount, unreliableCount,
+					totalReliableCount, totalUnreliableCount, lastUpdate)
+					.execute();
+
+			handleDbInfo();
 		}
 
 	};
