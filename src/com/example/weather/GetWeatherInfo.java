@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -27,8 +28,8 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 
 	String YQLresult;
 	String woeidResult;
-	
-	String[] result = new String[4];
+
+	String[] result = new String[5];
 
 	GetWeatherInfo(double lng, double lat) {
 		this.lng = lng;
@@ -93,18 +94,31 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 			weatherNameSet(result[0]);
 			result[1] = humidity;// %
 			result[2] = temperature;// f
+			result[4] = jCondition.getString("code");
 
 		} catch (JSONException err) {
 			Log.e(TAG, "error: " + err.toString());
+			result[0] = "Unknown";
+			result[1] = "Unknown";
+			result[2] = "Unknown";
+		} catch (NullPointerException err) {
+			Log.e(TAG, "error: " + err.toString());
+			result[0] = "Unknown";
+			result[1] = "Unknown";
+			result[2] = "Unknown";
+			
 		}
 
 		return result;
 	}
 
 	private void getWeather(String query) {
-		String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
+
+		InputStream inputStream = null;
 
 		try {
+			String baseUrl = "https://query.yahooapis.com/v1/public/yql?q=";
+
 			String totalUrl = baseUrl + URLEncoder.encode(query, "UTF-8")
 					+ "&format=json";
 
@@ -122,43 +136,35 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 
 			httppost.setHeader("Content-type", "application/json");
 
-			InputStream inputStream = null;
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity entity = response.getEntity();
 
+			inputStream = entity.getContent();
+			// json is UTF-8 by default
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					inputStream, "UTF-8"), 8);
+			StringBuilder sb = new StringBuilder();
+
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+			YQLresult = sb.toString();
+			if (Debug.on) {
+				Log.v(TAG, "YQL result: " + YQLresult);
+			}
+		} catch (Exception err) {
+			Log.e(TAG, "error: " + err.toString());
+		} finally {
 			try {
-				HttpResponse response = httpclient.execute(httppost);
-				HttpEntity entity = response.getEntity();
-
-				inputStream = entity.getContent();
-				// json is UTF-8 by default
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(inputStream, "UTF-8"), 8);
-				StringBuilder sb = new StringBuilder();
-
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					sb.append(line + "\n");
-				}
-				YQLresult = sb.toString();
-				if (Debug.on) {
-					Log.v(TAG, "YQL result: " + YQLresult);
-				}
+				if (inputStream != null)
+					inputStream.close();
 			} catch (Exception err) {
-				Log.e(TAG, "error: " + err.toString());
-			} finally {
-				try {
-					if (inputStream != null)
-						inputStream.close();
-				} catch (Exception err) {
-					if (Debug.on) {
-						Log.e(TAG, "error: " + err.toString());
-					}
+				if (Debug.on) {
+					Log.e(TAG, "error: " + err.toString());
 				}
 			}
-
-		} catch (UnsupportedEncodingException err) {
-			Log.e(TAG, "error: " + err.toString());
 		}
-
 	}
 
 	private void getWOEID(String query) {

@@ -1,6 +1,7 @@
 package com.example.weather;
 
 import java.text.DecimalFormat;
+
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutionException;
 
@@ -10,12 +11,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -25,8 +30,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
 
 public class MainActivity extends Activity {
 
@@ -39,6 +46,8 @@ public class MainActivity extends Activity {
 	private double lng = -99999;
 	private double lat = -99999;
 
+	int refreshDelayTime = 10000;
+
 	String[] YQLresult;
 	String YQLquery;
 	String geoNameResult;
@@ -50,6 +59,9 @@ public class MainActivity extends Activity {
 	String totalReliableCount = "0";
 	String totalUnreliableCount = "0";
 	String lastUpdate;
+	int weatherCode;
+
+	Handler refreshScreenHandler = new Handler();
 
 	@Override
 	protected void onStart() {
@@ -86,12 +98,25 @@ public class MainActivity extends Activity {
 			DecimalFormat temp = new DecimalFormat("#.0");
 			currentTemperature_txt.setText(temp.format((Double
 					.parseDouble(YQLresult[2]) - 32) * 5 / 9));
+
+			weatherCode = Integer.parseInt(YQLresult[4]);
+			// if (Debug.on) {
+			Log.v(TAG, "Weather Code: " + weatherCode);
+			// }
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
+			currentTemperature_txt.setText("Unknown");
 		} catch (ExecutionException err) {
 			Log.e(TAG, "error: " + err.toString());
+			currentTemperature_txt.setText("Unknown");
 		}
 
+	}
+
+	public boolean isOnline() {
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		return netInfo != null && netInfo.isConnectedOrConnecting();
 	}
 
 	private void handleGeoName() {
@@ -129,32 +154,36 @@ public class MainActivity extends Activity {
 				Log.v(TAG, "Last Update: " + lastUpdate);
 			}
 
-			double tempTotalRe;
-			if ((Double.parseDouble(totalReliableCount) + Double
-					.parseDouble(totalUnreliableCount)) == 0) {
-				tempTotalRe = 0;
-			} else {
+			try {
+
+				double tempTotalRe;
+				if ((Double.parseDouble(totalReliableCount) + Double
+						.parseDouble(totalUnreliableCount)) == 0) {
+					tempTotalRe = 0;
+				} else {
+					DecimalFormat temp = new DecimalFormat("#0.0");
+					tempTotalRe = Double.parseDouble(totalReliableCount)
+							/ (Double.parseDouble(totalReliableCount) + Double
+									.parseDouble(totalUnreliableCount)) * 100;
+					temp.format(tempTotalRe);
+
+				}
+
+				if (Debug.on) {
+					Log.v(TAG, "Reliability:" + tempTotalRe + "%");
+				}
 				DecimalFormat temp = new DecimalFormat("#0.0");
-				tempTotalRe = Double.parseDouble(totalReliableCount)
-						/ (Double.parseDouble(totalReliableCount) + Double
-								.parseDouble(totalUnreliableCount)) * 100;
-				temp.format(tempTotalRe);
 
+				reliability_txt.setText(temp.format(tempTotalRe) + "%");
+			} catch (Exception err) {
+				Log.e(TAG, "error: " + err.toString());
+				reliability_txt.setText("Unknown" + "%");
 			}
 
-			if (Debug.on) {
-				Log.v(TAG, "Reliability:" + tempTotalRe + "%");
-			}
-			DecimalFormat temp = new DecimalFormat("#0.0");
-
-			reliability_txt.setText(temp.format(tempTotalRe) + "%");
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (InterruptedException err) {
+			Log.e(TAG, "error: " + err.toString());
+		} catch (ExecutionException err) {
+			Log.e(TAG, "error: " + err.toString());
 		}
 
 	}
@@ -226,6 +255,27 @@ public class MainActivity extends Activity {
 		unreliable_btn.setOnClickListener(unreliable);
 	}
 
+	Runnable refreshScreen = new Runnable() {
+		@Override
+		public void run() {
+
+			try {
+				handleWeatherInfo();
+				handleGeoName();
+				handleDbInfo();
+			} catch (Exception err) {
+				Log.e(TAG, "error: " + err.toString());
+				if (!isOnline()) {
+					Toast.makeText(MainActivity.this, "請開啟網路以獲得最新天氣資訊",
+							Toast.LENGTH_LONG).show();
+				}
+			}
+
+			refreshScreenHandler.postDelayed(this, refreshDelayTime);
+
+		}
+	};
+
 	private void whereAmI() {
 		// 取得上次已知的位置
 		Location location = locationMgr.getLastKnownLocation(provider);
@@ -273,13 +323,10 @@ public class MainActivity extends Activity {
 					.toString(Integer.parseInt(reliableCount) + 1);
 			totalReliableCount = Integer.toString(Integer
 					.parseInt(totalReliableCount) + 1);
-
 			if (woeid != "-1" && DBresult != null) {
 				new ReliabilityButtonsAction(woeid, reliableCount,
 						unreliableCount, totalReliableCount,
 						totalUnreliableCount, lastUpdate).execute();
-
-				handleDbInfo();
 			} else {
 				Toast.makeText(MainActivity.this, "尚未取得地區資訊",
 						Toast.LENGTH_SHORT).show();
@@ -302,8 +349,6 @@ public class MainActivity extends Activity {
 				new ReliabilityButtonsAction(woeid, reliableCount,
 						unreliableCount, totalReliableCount,
 						totalUnreliableCount, lastUpdate).execute();
-
-				handleDbInfo();
 			} else {
 				Toast.makeText(MainActivity.this, "尚未取得地區資訊",
 						Toast.LENGTH_SHORT).show();
@@ -345,10 +390,27 @@ public class MainActivity extends Activity {
 		@Override
 		public void onLocationChanged(Location location) {
 			updateWithNewLocation(location);
-			handleWeatherInfo();
-			handleGeoName();
-			handleDbInfo();
+			if (isOnline()) {
+				try {
+					refreshScreenHandler.postDelayed(refreshScreen,
+							refreshDelayTime);
+					handleWeatherInfo();
+					setBackground();
+					handleGeoName();
+					handleDbInfo();
+					
 
+				} catch (Exception err) {
+					Log.e(TAG, "error: " + err.toString());
+					if (!isOnline()) {
+						Toast.makeText(MainActivity.this, "請開啟網路以獲得最新天氣資訊",
+								Toast.LENGTH_LONG).show();
+					}
+				}
+			} else {
+				Toast.makeText(MainActivity.this, "請開啟網路以獲得最新天氣資訊",
+						Toast.LENGTH_LONG).show();
+			}
 		}
 
 		@Override
@@ -476,5 +538,145 @@ public class MainActivity extends Activity {
 	private String getTimeString(long timeInMilliseconds) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return format.format(timeInMilliseconds);
+	}
+
+	private void setBackground() {
+
+		LinearLayout MainLinearLayout = (LinearLayout) findViewById(R.id.MainLinearLayout);
+		Drawable background = background = getResources().getDrawable(
+				R.drawable.clear_d);
+		;
+		switch (weatherCode) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 3:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 4:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7:
+			break;
+		case 8:
+			break;
+		case 9:
+			background = getResources().getDrawable(R.drawable.rain_d);
+			break;
+		case 10:
+			break;
+		case 11:
+			background = getResources().getDrawable(R.drawable.rain_d);
+			break;
+		case 12:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 13:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 14:
+			break;
+		case 15:
+			break;
+		case 16:
+			break;
+		case 17:
+			break;
+		case 18:
+			break;
+		case 19:
+			break;
+		case 20:
+			break;
+		case 21:
+			break;
+		case 22:
+			break;
+		case 23:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 24:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 25:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 26:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 27:
+			background = getResources().getDrawable(R.drawable.cloud_n);
+			break;
+		case 28:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 29:
+			background = getResources().getDrawable(R.drawable.cloud_n);
+			break;
+		case 30:
+			background = getResources().getDrawable(R.drawable.cloud_d);
+			break;
+		case 31:
+			background = getResources().getDrawable(R.drawable.clear_d);
+			break;
+		case 32:
+			background = getResources().getDrawable(R.drawable.clear_d);
+			break;
+		case 33:
+			background = getResources().getDrawable(R.drawable.clear_n);
+			break;
+		case 34:
+			background = getResources().getDrawable(R.drawable.clear_d);
+			break;
+		case 35:
+			break;
+		case 36:
+			background = getResources().getDrawable(R.drawable.clear_d);
+			break;
+		case 37:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 38:
+			break;
+		case 39:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 40:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 41:
+			break;
+		case 42:
+			background = getResources().getDrawable(R.drawable.rain_d);
+			break;
+		case 43:
+			break;
+		case 44:
+			background = getResources().getDrawable(R.drawable.clear_d);
+			break;
+		case 45:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 46:
+			background = getResources().getDrawable(R.drawable.rain_d);
+			break;
+		case 47:
+			background = getResources().getDrawable(R.drawable.rain_n);
+			break;
+		case 3200:
+			break;
+		default:
+			Log.e(TAG, "error: Don't have this weather condition!?");
+		}
+		
+		MainLinearLayout.setBackground(background);
 	}
 }

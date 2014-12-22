@@ -20,8 +20,8 @@ public class GetGeoName extends AsyncTask<Void, Void, String> {
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 
-	double lng;
-	double lat;
+	double lng = -999999;
+	double lat = -999999;
 
 	String Gresult;
 	String result;
@@ -47,10 +47,9 @@ public class GetGeoName extends AsyncTask<Void, Void, String> {
 			}
 			result = jFormatAddress;
 		} catch (JSONException err) {
-			// TODO Auto-generated catch block
-
 			Log.e(TAG, "error: " + err.toString());
-
+		} catch (NullPointerException err) {
+			Log.e(TAG, "error: " + err.toString());
 		}
 		return result;
 	}
@@ -64,19 +63,19 @@ public class GetGeoName extends AsyncTask<Void, Void, String> {
 			Log.v(TAG, "Total URL:" + totalUrl);
 		}
 
-		DefaultHttpClient httpclient = new DefaultHttpClient(
-				new BasicHttpParams());
-		HttpPost httppost = new HttpPost(totalUrl);
-
-		if (Debug.on) {
-			Log.v(TAG, "URI:" + httppost.getURI());
-		}
-
-		httppost.setHeader("Content-type", "application/json");
-
 		InputStream inputStream = null;
 
 		try {
+			DefaultHttpClient httpclient = new DefaultHttpClient(
+					new BasicHttpParams());
+			HttpPost httppost = new HttpPost(totalUrl);
+
+			if (Debug.on) {
+				Log.v(TAG, "URI:" + httppost.getURI());
+			}
+
+			httppost.setHeader("Content-type", "application/json");
+
 			HttpResponse response = httpclient.execute(httppost);
 			HttpEntity entity = response.getEntity();
 
@@ -95,13 +94,14 @@ public class GetGeoName extends AsyncTask<Void, Void, String> {
 				Log.v(TAG, "Google result: " + Gresult);
 			}
 		} catch (Exception err) {
-				Log.e(TAG, "error: " + err.toString());
+			Log.e(TAG, "error: " + "asd" + err.toString());
+
 		} finally {
 			try {
 				if (inputStream != null)
 					inputStream.close();
 			} catch (Exception err) {
-					Log.e(TAG, "error: " + err.toString());
+				Log.e(TAG, "error: " + err.toString());
 			}
 		}
 

@@ -43,16 +43,18 @@ public class GetDbInfo extends AsyncTask<Void, Void, String[]> {
 	@Override
 	protected String[] doInBackground(Void... params) {
 
-		String link = "http://pc0805a.lionfree.net/weather/getDbInfo.php?woeid="
-				+ woeid;
-
-		DefaultHttpClient httpclient = new DefaultHttpClient(
-				new BasicHttpParams());
-		HttpPost httppost = new HttpPost(link);
-
 		InputStream inputStream = null;
 
 		try {
+			String link = "http://pc0805a.lionfree.net/weather/getDbInfo.php?woeid="
+					+ woeid;
+
+			DefaultHttpClient httpclient = new DefaultHttpClient(
+					new BasicHttpParams());
+			HttpPost httppost = new HttpPost(link);
+
+			
+			
 			HttpResponse response = httpclient.execute(httppost);
 			HttpEntity entity = response.getEntity();
 
