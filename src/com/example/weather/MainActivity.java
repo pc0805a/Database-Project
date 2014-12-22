@@ -544,7 +544,7 @@ public class MainActivity extends Activity {
 
 		LinearLayout MainLinearLayout = (LinearLayout) findViewById(R.id.MainLinearLayout);
 		Drawable background = background = getResources().getDrawable(
-				R.drawable.clear_d);
+				R.drawable.unknown);
 		;
 		switch (weatherCode) {
 		case 0:
@@ -674,6 +674,7 @@ public class MainActivity extends Activity {
 		case 3200:
 			break;
 		default:
+			background = getResources().getDrawable(R.drawable.unknown);
 			Log.e(TAG, "error: Don't have this weather condition!?");
 		}
 		

@@ -34,6 +34,7 @@ public final class R {
         public static final int rain_d=0x7f020006;
         public static final int rain_n=0x7f020007;
         public static final int temp_background=0x7f020008;
+        public static final int unknown=0x7f020009;
     }
     public static final class id {
         public static final int CurrentCondition=0x7f090008;
