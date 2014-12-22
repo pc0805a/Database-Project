@@ -78,6 +78,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onStop() {
 		locationMgr.removeUpdates(locationListener);
+		refreshScreenHandler.removeCallbacks(refreshScreen);
 		super.onStop();
 	}
 
@@ -679,5 +680,11 @@ public class MainActivity extends Activity {
 		}
 		
 		MainLinearLayout.setBackground(background);
+	}
+
+	@Override
+	protected void onPause() {
+		
+		super.onPause();
 	}
 }
