@@ -8,10 +8,11 @@ import java.util.concurrent.ExecutionException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.GpsStatus;
@@ -46,8 +47,6 @@ public class MainActivity extends Activity {
 	private double lng = -99999;
 	private double lat = -99999;
 
-	int refreshDelayTime = 10000;
-
 	String[] YQLresult;
 	String YQLquery;
 	String geoNameResult;
@@ -61,12 +60,18 @@ public class MainActivity extends Activity {
 	String lastUpdate;
 	int weatherCode;
 
-	Handler refreshScreenHandler = new Handler();
+	Handler networkConnectionHandler = new Handler();
+	int checkNetworkDelayTime = 10000;
+	Handler refreshHandler = new Handler();
+	int refreshDelayTime = 1 * 60 * 60 * 1000;// 1hr
+
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		if (initLocationProvider()) {
+			networkConnectionHandler.postDelayed(checkNetworkConnection,
+					checkNetworkDelayTime);
 			whereAmI();
 		} else {
 			Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
@@ -76,9 +81,17 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	protected void onPause() {
+		networkConnectionHandler.removeCallbacks(checkNetworkConnection);
+		refreshHandler.removeCallbacks(refresh);
+		super.onPause();
+	}
+
+	@Override
 	protected void onStop() {
 		locationMgr.removeUpdates(locationListener);
-		refreshScreenHandler.removeCallbacks(refreshScreen);
+		networkConnectionHandler.removeCallbacks(checkNetworkConnection);
+		refreshHandler.removeCallbacks(refresh);
 		super.onStop();
 	}
 
@@ -89,6 +102,12 @@ public class MainActivity extends Activity {
 		initViews();
 		setListeners();
 
+	}
+	
+	public boolean isOnline() {
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		return netInfo != null && netInfo.isConnectedOrConnecting();
 	}
 
 	private void handleWeatherInfo() {
@@ -101,9 +120,9 @@ public class MainActivity extends Activity {
 					.parseDouble(YQLresult[2]) - 32) * 5 / 9));
 
 			weatherCode = Integer.parseInt(YQLresult[4]);
-			// if (Debug.on) {
-			Log.v(TAG, "Weather Code: " + weatherCode);
-			// }
+			if (Debug.on) {
+				Log.v(TAG, "Weather Code: " + weatherCode);
+			}
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
 			currentTemperature_txt.setText("Unknown");
@@ -112,12 +131,6 @@ public class MainActivity extends Activity {
 			currentTemperature_txt.setText("Unknown");
 		}
 
-	}
-
-	public boolean isOnline() {
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo netInfo = cm.getActiveNetworkInfo();
-		return netInfo != null && netInfo.isConnectedOrConnecting();
 	}
 
 	private void handleGeoName() {
@@ -176,6 +189,7 @@ public class MainActivity extends Activity {
 				DecimalFormat temp = new DecimalFormat("#0.0");
 
 				reliability_txt.setText(temp.format(tempTotalRe) + "%");
+				lastUpdate_txt.setText(lastUpdate);
 			} catch (Exception err) {
 				Log.e(TAG, "error: " + err.toString());
 				reliability_txt.setText("Unknown" + "%");
@@ -256,25 +270,34 @@ public class MainActivity extends Activity {
 		unreliable_btn.setOnClickListener(unreliable);
 	}
 
-	Runnable refreshScreen = new Runnable() {
+	Runnable checkNetworkConnection = new Runnable() {
 		@Override
 		public void run() {
-
-			try {
-				handleWeatherInfo();
-				handleGeoName();
-				handleDbInfo();
-			} catch (Exception err) {
-				Log.e(TAG, "error: " + err.toString());
-				if (!isOnline()) {
-					Toast.makeText(MainActivity.this, "請開啟網路以獲得最新天氣資訊",
-							Toast.LENGTH_LONG).show();
-				}
+			if (!isOnline()) {
+				Toast.makeText(MainActivity.this, "請開啟網路以獲得最新天氣資訊",
+						Toast.LENGTH_LONG).show();
+			} else {
+				refreshHandler.postDelayed(refresh, refreshDelayTime);
 			}
-
-			refreshScreenHandler.postDelayed(this, refreshDelayTime);
+			networkConnectionHandler.postDelayed(this, checkNetworkDelayTime);
 
 		}
+	};
+
+	Runnable refresh = new Runnable() {
+		@Override
+		public void run() {
+			if (isOnline()) {
+				handleWeatherInfo();
+				setBackground();
+				handleGeoName();
+				handleDbInfo();
+				refreshHandler.postDelayed(this, refreshDelayTime);
+			} else {
+				refreshHandler.removeCallbacks(refresh);
+			}
+		}
+
 	};
 
 	private void whereAmI() {
@@ -328,6 +351,12 @@ public class MainActivity extends Activity {
 				new ReliabilityButtonsAction(woeid, reliableCount,
 						unreliableCount, totalReliableCount,
 						totalUnreliableCount, lastUpdate).execute();
+				reliable_btn.setEnabled(false);
+				unreliable_btn.setEnabled(false);
+				handleDbInfo();
+				Toast.makeText(MainActivity.this, "感謝您提供資訊", Toast.LENGTH_SHORT)
+						.show();
+
 			} else {
 				Toast.makeText(MainActivity.this, "尚未取得地區資訊",
 						Toast.LENGTH_SHORT).show();
@@ -350,6 +379,12 @@ public class MainActivity extends Activity {
 				new ReliabilityButtonsAction(woeid, reliableCount,
 						unreliableCount, totalReliableCount,
 						totalUnreliableCount, lastUpdate).execute();
+				reliable_btn.setEnabled(false);
+				unreliable_btn.setEnabled(false);
+				handleDbInfo();
+				Toast.makeText(MainActivity.this, "感謝您提供資訊", Toast.LENGTH_SHORT)
+						.show();
+
 			} else {
 				Toast.makeText(MainActivity.this, "尚未取得地區資訊",
 						Toast.LENGTH_SHORT).show();
@@ -393,13 +428,10 @@ public class MainActivity extends Activity {
 			updateWithNewLocation(location);
 			if (isOnline()) {
 				try {
-					refreshScreenHandler.postDelayed(refreshScreen,
-							refreshDelayTime);
 					handleWeatherInfo();
 					setBackground();
 					handleGeoName();
 					handleDbInfo();
-					
 
 				} catch (Exception err) {
 					Log.e(TAG, "error: " + err.toString());
@@ -452,16 +484,12 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			openOptionsDialog();
@@ -524,7 +552,6 @@ public class MainActivity extends Activity {
 			// "我"
 			longitude_txt.setText("經度: " + lng);
 			latitude_txt.setText("緯度: " + lat);
-			lastUpdate_txt.setText(timeString);
 
 		} else {
 			where = "無法取得地理資訊" + "\n若在室內請嘗試使用網路定位";
@@ -678,13 +705,8 @@ public class MainActivity extends Activity {
 			background = getResources().getDrawable(R.drawable.unknown);
 			Log.e(TAG, "error: Don't have this weather condition!?");
 		}
-		
+
 		MainLinearLayout.setBackground(background);
 	}
 
-	@Override
-	protected void onPause() {
-		
-		super.onPause();
-	}
 }
