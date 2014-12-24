@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class SearchActivity extends Activity {
-
+//	http://maps.googleapis.com/maps/api/geocode/json?address=
 	private static final String TAG = SearchActivity.class.getSimpleName();
 
 	@Override
