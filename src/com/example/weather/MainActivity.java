@@ -12,6 +12,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
@@ -100,6 +101,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		initViews();
 		setListeners();
+		setAdapter();
 
 	}
 
@@ -107,6 +109,16 @@ public class MainActivity extends Activity {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = cm.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnectedOrConnecting();
+	}
+
+	private DB mDBHelper;
+	private Cursor mCursor;
+
+	@SuppressWarnings("deprecation")
+	private void setAdapter() {
+		mDBHelper = new DB(this);
+		mDBHelper.open();
+		
 	}
 
 	private void handleWeatherInfo() {
@@ -291,6 +303,8 @@ public class MainActivity extends Activity {
 				setBackground();
 				handleGeoName();
 				handleDbInfo();
+				insertHistory();
+				
 				refreshHandler.postDelayed(this, refreshDelayTime);
 			} else {
 				refreshHandler.removeCallbacks(refresh);
@@ -298,6 +312,22 @@ public class MainActivity extends Activity {
 		}
 
 	};
+	
+	private void insertHistory()
+	{
+		String[] insertData = new String[7];
+		
+		insertData[0] = woeid_txt.getText().toString();
+		insertData[1] = currentLocation_txt.getText().toString();
+		insertData[2] = currentCondition_txt.getText().toString();
+		insertData[3] = humidity_txt.getText().toString();
+		insertData[4] = currentTemperature_txt.getText().toString();
+		insertData[5] = reliability_txt.getText().toString();
+		insertData[6] = lastUpdate_txt.getText().toString();
+		
+		
+		mDBHelper.Insert(insertData);
+	}
 
 	private void whereAmI() {
 		// 取得上次已知的位置
