@@ -45,9 +45,9 @@ public final class R {
         public static final int TextView01=0x7f09000e;
         public static final int TextView02=0x7f090012;
         public static final int TextView03=0x7f090001;
-        public static final int action_about=0x7f090022;
-        public static final int action_close=0x7f090023;
-        public static final int action_settings=0x7f090021;
+        public static final int action_about=0x7f090021;
+        public static final int action_close=0x7f090022;
+        public static final int action_settings=0x7f090020;
         public static final int buttons=0x7f090017;
         public static final int current_condition=0x7f09000b;
         public static final int current_location=0x7f090002;
@@ -71,7 +71,6 @@ public final class R {
         public static final int textView8=0x7f090015;
         public static final int textView9=0x7f09000a;
         public static final int unreliable_btn=0x7f09001c;
-        public static final int webview=0x7f090020;
         public static final int woeid=0x7f090007;
     }
     public static final class layout {

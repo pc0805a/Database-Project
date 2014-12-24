@@ -3,10 +3,6 @@ package com.example.weather;
 import java.text.DecimalFormat;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,49 +19,31 @@ public class SearchActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
-
-		WebView web = (WebView) findViewById(R.id.webview);
-		web.getSettings().setJavaScriptEnabled(true);
-		web.setWebViewClient(new InsideWebViewClient());
-		web.loadUrl("https://weather.yahoo.com/");
-		
 		initViews();
-		showResults();
 		setListeners();
 
 	}
-
+	private TextView lastUpdate_txt;
+	private TextView currentCondition_txt;
+	private TextView humidity_txt;
+	private TextView currentTemperature_txt;
+	private TextView currentLocation_txt;
+	private TextView reliability_txt;
 	private void initViews() {
+		lastUpdate_txt = (TextView) findViewById(R.id.last_update);
+		currentCondition_txt = (TextView) findViewById(R.id.current_condition);
+		humidity_txt = (TextView) findViewById(R.id.humidity);
+		currentTemperature_txt = (TextView) findViewById(R.id.current_temperature);
+		currentLocation_txt = (TextView) findViewById(R.id.current_location);
+		reliability_txt = (TextView) findViewById(R.id.reliability_txt);
 
 	}
 
-	protected void showResults() {
-	}
-
-	protected void showNotification(double BMI) {
-
-	}
 
 	private void setListeners() {
 
 	}
 
-	private Button.OnClickListener backtoMain = new Button.OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-			
-		}
-
-	};
 
 }
 
-class InsideWebViewClient extends WebViewClient {
-    @Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        view.loadUrl(url);
-        return true;
-    }
-}

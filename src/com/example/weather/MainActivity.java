@@ -65,7 +65,6 @@ public class MainActivity extends Activity {
 	Handler refreshHandler = new Handler();
 	int refreshDelayTime = 1 * 60 * 60 * 1000;// 1hr
 
-
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -103,7 +102,7 @@ public class MainActivity extends Activity {
 		setListeners();
 
 	}
-	
+
 	public boolean isOnline() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = cm.getActiveNetworkInfo();
@@ -343,16 +342,16 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			reliableCount = Integer
-					.toString(Integer.parseInt(reliableCount) + 1);
-			totalReliableCount = Integer.toString(Integer
-					.parseInt(totalReliableCount) + 1);
 			if (woeid != "-1" && DBresult != null) {
+				reliable_btn.setEnabled(false);
+				unreliable_btn.setEnabled(false);
+				reliableCount = Integer.toString(Integer
+						.parseInt(reliableCount) + 1);
+				totalReliableCount = Integer.toString(Integer
+						.parseInt(totalReliableCount) + 1);
 				new ReliabilityButtonsAction(woeid, reliableCount,
 						unreliableCount, totalReliableCount,
 						totalUnreliableCount, lastUpdate).execute();
-				reliable_btn.setEnabled(false);
-				unreliable_btn.setEnabled(false);
 				handleDbInfo();
 				Toast.makeText(MainActivity.this, "感謝您提供資訊", Toast.LENGTH_SHORT)
 						.show();
@@ -370,17 +369,17 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			unreliableCount = Integer.toString(Integer
-					.parseInt(unreliableCount) + 1);
-			totalUnreliableCount = Integer.toString(Integer
-					.parseInt(totalUnreliableCount) + 1);
-
 			if (woeid != "-1" && DBresult != null) {
+				reliable_btn.setEnabled(false);
+				unreliable_btn.setEnabled(false);
+				unreliableCount = Integer.toString(Integer
+						.parseInt(unreliableCount) + 1);
+				totalUnreliableCount = Integer.toString(Integer
+						.parseInt(totalUnreliableCount) + 1);
 				new ReliabilityButtonsAction(woeid, reliableCount,
 						unreliableCount, totalReliableCount,
 						totalUnreliableCount, lastUpdate).execute();
-				reliable_btn.setEnabled(false);
-				unreliable_btn.setEnabled(false);
+
 				handleDbInfo();
 				Toast.makeText(MainActivity.this, "感謝您提供資訊", Toast.LENGTH_SHORT)
 						.show();
