@@ -70,6 +70,9 @@ public class MainActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 		if (initLocationProvider()) {
+			
+			getHistory();
+			
 			networkConnectionHandler.postDelayed(checkNetworkConnection,
 					checkNetworkDelayTime);
 			whereAmI();
@@ -114,11 +117,12 @@ public class MainActivity extends Activity {
 	private DB mDBHelper;
 	private Cursor mCursor;
 
-	@SuppressWarnings("deprecation")
+	private String reliability = "0";
+
 	private void setAdapter() {
 		mDBHelper = new DB(this);
 		mDBHelper.open();
-		
+
 	}
 
 	private void handleWeatherInfo() {
@@ -199,7 +203,9 @@ public class MainActivity extends Activity {
 				}
 				DecimalFormat temp = new DecimalFormat("#0.0");
 
-				reliability_txt.setText(temp.format(tempTotalRe) + "%");
+				reliability = temp.format(tempTotalRe);
+
+				reliability_txt.setText(reliability + "%");
 				lastUpdate_txt.setText(lastUpdate);
 			} catch (Exception err) {
 				Log.e(TAG, "error: " + err.toString());
@@ -288,6 +294,7 @@ public class MainActivity extends Activity {
 				Toast.makeText(MainActivity.this, "請開啟網路以獲得最新天氣資訊",
 						Toast.LENGTH_LONG).show();
 			} else {
+				insertHistory();
 				refreshHandler.postDelayed(refresh, refreshDelayTime);
 			}
 			networkConnectionHandler.postDelayed(this, checkNetworkDelayTime);
@@ -303,8 +310,7 @@ public class MainActivity extends Activity {
 				setBackground();
 				handleGeoName();
 				handleDbInfo();
-				insertHistory();
-				
+
 				refreshHandler.postDelayed(this, refreshDelayTime);
 			} else {
 				refreshHandler.removeCallbacks(refresh);
@@ -312,22 +318,40 @@ public class MainActivity extends Activity {
 		}
 
 	};
-	
-	private void insertHistory()
-	{
+
+	private void insertHistory() {
 		String[] insertData = new String[7];
-		
-		insertData[0] = woeid_txt.getText().toString();
+
+		insertData[0] = woeid;
 		insertData[1] = currentLocation_txt.getText().toString();
 		insertData[2] = currentCondition_txt.getText().toString();
 		insertData[3] = humidity_txt.getText().toString();
 		insertData[4] = currentTemperature_txt.getText().toString();
-		insertData[5] = reliability_txt.getText().toString();
+		insertData[5] = reliability;
 		insertData[6] = lastUpdate_txt.getText().toString();
-		
-		
-		mDBHelper.Insert(insertData);
+
+		mDBHelper.delete(1);
+		mDBHelper.insert(insertData);
+
 	}
+	
+	private void getHistory()
+	{
+		Cursor cursor = mDBHelper.getAll();
+		int row_num = cursor.getCount();
+		if(row_num!=0)
+		{
+			cursor.moveToFirst();
+			currentLocation_txt.setText(cursor.getString(2));
+			currentCondition_txt.setText(cursor.getString(3));
+			humidity_txt.setText(cursor.getString(4));
+			currentTemperature_txt.setText(cursor.getString(5));
+			reliability_txt.setText(cursor.getDouble(6)+"%");
+			lastUpdate_txt.setText(cursor.getString(7));
+		}
+	}
+	
+	
 
 	private void whereAmI() {
 		// 取得上次已知的位置
