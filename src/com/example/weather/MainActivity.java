@@ -374,41 +374,43 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-		
-			
-			
-			
 
-			Intent intent = new Intent();
+			if (isOnline()) {
+				Intent intent = new Intent();
 
-			intent.setClass(MainActivity.this, SearchActivity.class);
-			Bundle bundle = new Bundle();
-			try {
+				intent.setClass(MainActivity.this, SearchActivity.class);
+				Bundle bundle = new Bundle();
+				try {
 
-				String searchInput = searchLocation_txt.getText().toString();
-				
-				String[] tempGeo = new GetGeoInfo(searchInput).execute().get();
-				
-				bundle.putString("KEY_GEO_NAME", tempGeo[0]);
-				bundle.putString("KEY_LNG", tempGeo[1]);
-				bundle.putString("KEY_LAT", tempGeo[2]);
-				
-				
-				String[] tempWea = new GetWeatherInfo(tempGeo[1],tempGeo[2]).execute().get();
-				
-				bundle.putString("KEY_CONDI", tempWea[0]);
-				bundle.putString("KEY_HUMID", tempWea[1]);
-				bundle.putString("KEY_TEMP", tempWea[2]);
-				bundle.putString("KEY_WOEID", tempWea[3]);
-				bundle.putInt("KEY_CODE", Integer.parseInt(tempWea[4]));
-				if (Debug.on) {
-					Log.v(TAG, "Input: " + searchInput);
+					String searchInput = searchLocation_txt.getText()
+							.toString().replaceAll("\\s", "");
+
+					String[] tempGeo = new GetGeoInfo(searchInput).execute()
+							.get();
+
+					bundle.putString("KEY_GEO_NAME", tempGeo[0]);
+					bundle.putString("KEY_LNG", tempGeo[1]);
+					bundle.putString("KEY_LAT", tempGeo[2]);
+
+					String[] tempWea = new GetWeatherInfo(tempGeo[1],
+							tempGeo[2]).execute().get();
+
+					bundle.putString("KEY_CONDI", tempWea[0]);
+					bundle.putString("KEY_HUMID", tempWea[1]);
+					bundle.putString("KEY_TEMP", tempWea[2]);
+					bundle.putString("KEY_WOEID", tempWea[3]);
+					bundle.putInt("KEY_CODE", Integer.parseInt(tempWea[4]));
+					if (Debug.on) {
+						Log.v(TAG, "Input: " + searchInput);
+					}
+					intent.putExtras(bundle);
+					startActivityForResult(intent, ACTIVITY_REPORT);
+				} catch (Exception err) {
+					Log.e(TAG, "error: " + err.toString());
 				}
-				intent.putExtras(bundle);
-				startActivityForResult(intent, ACTIVITY_REPORT);
-			} catch (Exception err) {
-				Log.e(TAG, "error: " + err.toString());
-				Toast.makeText(MainActivity.this, R.string.input_error,
+
+			} else {
+				Toast.makeText(MainActivity.this, "請開啟網路以使用搜尋功能",
 						Toast.LENGTH_SHORT).show();
 			}
 
