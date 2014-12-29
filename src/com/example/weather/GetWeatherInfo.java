@@ -36,6 +36,11 @@ public class GetWeatherInfo extends AsyncTask<Void, Void, String[]> {
 		this.lat = lat;
 
 	}
+	GetWeatherInfo(String lng, String lat) {
+		this.lng = Double.parseDouble(lng);
+		this.lat = Double.parseDouble(lat);
+
+	}
 
 	@Override
 	protected String[] doInBackground(Void... params) {

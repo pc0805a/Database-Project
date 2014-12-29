@@ -20,5 +20,6 @@
 	<string name="btn_unreliable">Unreable</string>
 	<string name="btn_search">搜尋</string>
 	<string name="last_update">最後更新</string>
-	<string name="reliability_lable">可靠度</string>
+	<string name="reliability_label">可靠度</string>
+	<string name="location_label">位置</string>
 </resources>

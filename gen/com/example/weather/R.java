@@ -58,11 +58,11 @@ public final class R {
         public static final int last_update=0x7f090016;
         public static final int lat=0x7f090006;
         public static final int lng=0x7f090004;
-        public static final int location=0x7f09001e;
-        public static final int reliability_lable=0x7f09001a;
+        public static final int reliability_label=0x7f09001a;
         public static final int reliability_txt=0x7f09001b;
         public static final int reliable_btn=0x7f090018;
         public static final int search_btn=0x7f09001f;
+        public static final int search_location_txt=0x7f09001e;
         public static final int textView1=0x7f090009;
         public static final int textView2=0x7f090011;
         public static final int textView3=0x7f09000d;
@@ -99,8 +99,9 @@ public final class R {
         public static final int input_error=0x7f060009;
         public static final int label_fb=0x7f060007;
         public static final int last_update=0x7f060012;
+        public static final int location_label=0x7f060014;
         public static final int other_location_label=0x7f06000b;
-        public static final int reliability_lable=0x7f060013;
+        public static final int reliability_label=0x7f060013;
     }
     public static final class style {
         /** 

@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
 
 	String[] YQLresult;
 	String YQLquery;
-	String geoNameResult;
+	String[] geoResult;
 	String[] DBresult;
 
 	String woeid = "-1";
@@ -70,9 +70,9 @@ public class MainActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 		if (initLocationProvider()) {
-			
+
 			getHistory();
-			
+
 			networkConnectionHandler.postDelayed(checkNetworkConnection,
 					checkNetworkDelayTime);
 			whereAmI();
@@ -140,21 +140,26 @@ public class MainActivity extends Activity {
 			}
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
-			currentTemperature_txt.setText("Unknown");
 		} catch (ExecutionException err) {
 			Log.e(TAG, "error: " + err.toString());
-			currentTemperature_txt.setText("Unknown");
 		}
 
 	}
 
 	private void handleGeoName() {
 		try {
-			geoNameResult = new GetGeoName(lng, lat).execute().get();
+			geoResult = new GetGeoInfo(lng, lat).execute().get();
 			// if (Debug.on) {
 			woeid_txt.setText("WOEID: " + YQLresult[3]);
 			// }
-			currentLocation_txt.setText(geoNameResult);
+
+			if (Debug.on) {
+				Log.v(TAG, "Geo Name: " + geoResult[0]);
+				Log.v(TAG, "Lng: " + geoResult[1]);
+				Log.v(TAG, "Lat: " + geoResult[2]);
+			}
+
+			currentLocation_txt.setText(geoResult[0]);
 		} catch (InterruptedException err) {
 			Log.e(TAG, "error: " + err.toString());
 		} catch (ExecutionException err) {
@@ -209,7 +214,6 @@ public class MainActivity extends Activity {
 				lastUpdate_txt.setText(lastUpdate);
 			} catch (Exception err) {
 				Log.e(TAG, "error: " + err.toString());
-				reliability_txt.setText("Unknown" + "%");
 			}
 
 		} catch (InterruptedException err) {
@@ -232,6 +236,7 @@ public class MainActivity extends Activity {
 	private TextView currentLocation_txt;
 	private TextView woeid_txt;
 	private TextView reliability_txt;
+	private TextView searchLocation_txt;
 
 	private void initViews() {
 		search_btn = (Button) findViewById(R.id.search_btn);
@@ -246,6 +251,7 @@ public class MainActivity extends Activity {
 		currentLocation_txt = (TextView) findViewById(R.id.current_location);
 		woeid_txt = (TextView) findViewById(R.id.woeid);
 		reliability_txt = (TextView) findViewById(R.id.reliability_txt);
+		searchLocation_txt = (TextView) findViewById(R.id.search_location_txt);
 	}
 
 	private boolean initLocationProvider() {
@@ -334,24 +340,20 @@ public class MainActivity extends Activity {
 		mDBHelper.insert(insertData);
 
 	}
-	
-	private void getHistory()
-	{
+
+	private void getHistory() {
 		Cursor cursor = mDBHelper.getAll();
 		int row_num = cursor.getCount();
-		if(row_num!=0)
-		{
+		if (row_num != 0) {
 			cursor.moveToFirst();
 			currentLocation_txt.setText(cursor.getString(2));
 			currentCondition_txt.setText(cursor.getString(3));
 			humidity_txt.setText(cursor.getString(4));
 			currentTemperature_txt.setText(cursor.getString(5));
-			reliability_txt.setText(cursor.getDouble(6)+"%");
+			reliability_txt.setText(cursor.getDouble(6) + "%");
 			lastUpdate_txt.setText(cursor.getString(7));
 		}
 	}
-	
-	
 
 	private void whereAmI() {
 		// 取得上次已知的位置
@@ -372,15 +374,37 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
+		
+			
+			
+			
 
 			Intent intent = new Intent();
 
 			intent.setClass(MainActivity.this, SearchActivity.class);
 			Bundle bundle = new Bundle();
 			try {
-				// bundle.putDouble("KEY_HEIGHT",
-				// Double.parseDouble(num_height.getText().toString()));
 
+				String searchInput = searchLocation_txt.getText().toString();
+				
+				String[] tempGeo = new GetGeoInfo(searchInput).execute().get();
+				
+				bundle.putString("KEY_GEO_NAME", tempGeo[0]);
+				bundle.putString("KEY_LNG", tempGeo[1]);
+				bundle.putString("KEY_LAT", tempGeo[2]);
+				
+				
+				String[] tempWea = new GetWeatherInfo(tempGeo[1],tempGeo[2]).execute().get();
+				
+				bundle.putString("KEY_CONDI", tempWea[0]);
+				bundle.putString("KEY_HUMID", tempWea[1]);
+				bundle.putString("KEY_TEMP", tempWea[2]);
+				bundle.putString("KEY_WOEID", tempWea[3]);
+				bundle.putInt("KEY_CODE", Integer.parseInt(tempWea[4]));
+				if (Debug.on) {
+					Log.v(TAG, "Input: " + searchInput);
+				}
+				intent.putExtras(bundle);
 				startActivityForResult(intent, ACTIVITY_REPORT);
 			} catch (Exception err) {
 				Log.e(TAG, "error: " + err.toString());
