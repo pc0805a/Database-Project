@@ -93,15 +93,15 @@ public final class R {
         public static final int current_location_label=0x7f06000a;
         public static final int current_temperature_label=0x7f06000d;
         public static final int current_weather_label=0x7f06000c;
-        public static final int fb_uri=0x7f060008;
         public static final int hello_world=0x7f060001;
         public static final int humidity_label=0x7f06000e;
         public static final int input_error=0x7f060009;
-        public static final int label_fb=0x7f060007;
+        public static final int label_teacher=0x7f060007;
         public static final int last_update=0x7f060012;
         public static final int location_label=0x7f060014;
         public static final int other_location_label=0x7f06000b;
         public static final int reliability_label=0x7f060013;
+        public static final int teacher_uri=0x7f060008;
     }
     public static final class style {
         /** 

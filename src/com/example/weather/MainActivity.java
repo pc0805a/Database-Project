@@ -190,25 +190,25 @@ public class MainActivity extends Activity {
 
 			try {
 
-				double tempTotalRe;
+				double tempTotalRel;
 				if ((Double.parseDouble(totalReliableCount) + Double
 						.parseDouble(totalUnreliableCount)) == 0) {
-					tempTotalRe = 0;
+					tempTotalRel = 0;
 				} else {
 					DecimalFormat temp = new DecimalFormat("#0.0");
-					tempTotalRe = Double.parseDouble(totalReliableCount)
+					tempTotalRel = Double.parseDouble(totalReliableCount)
 							/ (Double.parseDouble(totalReliableCount) + Double
 									.parseDouble(totalUnreliableCount)) * 100;
-					temp.format(tempTotalRe);
+					temp.format(tempTotalRel);
 
 				}
 
 				if (Debug.on) {
-					Log.v(TAG, "Reliability:" + tempTotalRe + "%");
+					Log.v(TAG, "Reliability:" + tempTotalRel + "%");
 				}
 				DecimalFormat temp = new DecimalFormat("#0.0");
 
-				reliability = temp.format(tempTotalRe);
+				reliability = temp.format(tempTotalRel);
 
 				reliability_txt.setText(reliability + "%");
 				lastUpdate_txt.setText(lastUpdate);
@@ -400,6 +400,44 @@ public class MainActivity extends Activity {
 					bundle.putString("KEY_TEMP", tempWea[2]);
 					bundle.putString("KEY_WOEID", tempWea[3]);
 					bundle.putInt("KEY_CODE", Integer.parseInt(tempWea[4]));
+					
+					String[] tempDbResult = new GetDbInfo(tempWea[3]).execute().get();
+					
+					String tempRel = tempDbResult[3];
+					String tempUnrel = tempDbResult[4];
+					String tempLastUpdate = tempDbResult[5]+ " "+ tempDbResult[6];
+					
+					bundle.putString("KEY_LAST", tempLastUpdate);
+					try {
+
+						double tempTotalRel;
+						if ((Double.parseDouble(tempRel) + Double
+								.parseDouble(tempUnrel)) == 0) {
+							tempTotalRel = 0;
+						} else {
+							DecimalFormat temp = new DecimalFormat("#0.0");
+							tempTotalRel = Double.parseDouble(tempRel)
+									/ (Double.parseDouble(tempRel) + Double
+											.parseDouble(tempUnrel)) * 100;
+							temp.format(tempTotalRel);
+
+						}
+
+						if (Debug.on) {
+							Log.v(TAG, "Reliability:" + tempTotalRel + "%");
+						}
+						DecimalFormat temp = new DecimalFormat("#0.0");
+
+						bundle.putString("KEY_REL", temp.format(tempTotalRel).toString());
+
+						
+					} catch (Exception err) {
+						Log.e(TAG, "error: " + err.toString());
+					}
+					
+					bundle.putInt("KEY_CODE", Integer.parseInt(tempWea[4]));
+					
+					
 					if (Debug.on) {
 						Log.v(TAG, "Input: " + searchInput);
 					}
@@ -407,6 +445,8 @@ public class MainActivity extends Activity {
 					startActivityForResult(intent, ACTIVITY_REPORT);
 				} catch (Exception err) {
 					Log.e(TAG, "error: " + err.toString());
+					Toast.makeText(MainActivity.this, "查無此地",
+							Toast.LENGTH_SHORT).show();
 				}
 
 			} else {
@@ -593,11 +633,11 @@ public class MainActivity extends Activity {
 
 					}
 				});
-		dialog.setNegativeButton(R.string.label_fb,
+		dialog.setNegativeButton(R.string.label_teacher,
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int i) {
-						Uri uri = Uri.parse(getString(R.string.fb_uri));
+						Uri uri = Uri.parse(getString(R.string.teacher_uri));
 						Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 						startActivity(intent);
 					}

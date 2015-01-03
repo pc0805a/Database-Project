@@ -48,6 +48,10 @@ public class SearchActivity extends Activity {
 				.getString("KEY_TEMP")) - 32) * 5 / 9));
 
 		weatherCode = bundle.getInt("KEY_CODE");
+		
+		reliability_txt.setText(bundle.getString("KEY_REL")+"%");
+		lastUpdate_txt.setText(bundle.getString("KEY_LAST"));
+		woeid_txt.setText("WOEID: "+bundle.getString("KEY_WOEID"));
 		setBackground();
 
 	}
@@ -74,6 +78,7 @@ public class SearchActivity extends Activity {
 	private TextView reliability_txt;
 	private TextView longitude_txt;
 	private TextView latitude_txt;
+	private TextView woeid_txt;
 
 	private void initViews() {
 		lastUpdate_txt = (TextView) findViewById(R.id.last_update);
@@ -84,6 +89,7 @@ public class SearchActivity extends Activity {
 		reliability_txt = (TextView) findViewById(R.id.reliability_txt);
 		longitude_txt = (TextView) findViewById(R.id.lng);
 		latitude_txt = (TextView) findViewById(R.id.lat);
+		woeid_txt = (TextView) findViewById(R.id.woeid);
 
 	}
 

@@ -192,6 +192,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
         android:text="@string/last_update"
         android:textColor="@color/white" />
 
@@ -208,6 +209,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="40dp"
         android:layout_weight="1"
         android:gravity="center_horizontal"
         android:orientation="vertical" >

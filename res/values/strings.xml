@@ -8,8 +8,8 @@
     <string name="action_close">Close</string>
     <string name="about_title">關於 Android weather</string>
     <string name="about_msg">Android weather, 練習用</string>
-    <string name="label_fb">FB</string>
-	<string name="fb_uri">https://www.facebook.com/profile.php?id=100002595540446</string>
+    <string name="label_teacher">Teacher</string>
+	<string name="teacher_uri">http://www3.csie.fju.edu.tw/image/teacherImg/T28.jpg</string>
 	<string name="input_error">請輸入地名</string>
 	<string name="current_location_label">當前位置</string>
 	<string name="other_location_label">其他地區</string>
